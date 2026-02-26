@@ -1,0 +1,125 @@
+﻿<UserControl x:Class="YUMAPI.Views.DetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="940"
+             Background="#111111">
+
+    <Grid>
+
+        <!-- Message d'accueil (visible au départ) -->
+        <StackPanel x:Name="PanneauAccueil"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Visibility="Visible">
+            <TextBlock Text="🍽️" FontSize="72"
+                       HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            <TextBlock Text="Sélectionnez une recette"
+                       Foreground="#555555" FontSize="22" FontWeight="SemiBold"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="ou recherchez un plat dans la liste"
+                       Foreground="#444444" FontSize="14"
+                       HorizontalAlignment="Center" Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <!-- Détail recette (caché au départ) -->
+        <ScrollViewer x:Name="PanneauDetail"
+                      Visibility="Collapsed"
+                      VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="380"/>
+                    <!-- Image hero -->
+                    <RowDefinition Height="*"/>
+                    <!-- Corps -->
+                </Grid.RowDefinitions>
+
+                <!-- ── IMAGE HERO ── -->
+                <Grid Grid.Row="0">
+                    <Image x:Name="DetailImage"
+                           Stretch="UniformToFill" Opacity="0.6"/>
+                    <Border Background="#88000000"/>
+
+                    <Grid VerticalAlignment="Bottom" Margin="40,0,40,30">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Tags -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Background="#FF6B35" CornerRadius="20" Padding="14,6">
+                                <TextBlock x:Name="TagCategorie"
+                                           Foreground="White" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                            <Border Background="#333333" CornerRadius="20"
+                                    Padding="14,6" Margin="8,0,0,0">
+                                <TextBlock x:Name="TagPays"
+                                           Foreground="White" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Titre -->
+                        <TextBlock x:Name="DetailTitre"
+                                   Grid.Row="1"
+                                   Foreground="White" FontSize="48"
+                                   FontWeight="Black" TextWrapping="Wrap"
+                                   Margin="0,0,0,16"/>
+
+                        <!-- Stats -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                                <TextBlock Text="⏱" FontSize="18" Foreground="White" Margin="0,0,8,0"/>
+                                <TextBlock Text="30 Minutes Prep" Foreground="White"
+                                           FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
+                                <TextBlock Text="👤" FontSize="18" Foreground="White" Margin="0,0,8,0"/>
+                                <TextBlock Text="Serves 2" Foreground="White"
+                                           FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔥" FontSize="18" Foreground="White" Margin="0,0,8,0"/>
+                                <TextBlock Text="450 kcal" Foreground="White"
+                                           FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- ── CORPS : ingrédients + instructions ── -->
+                <Grid Grid.Row="1" Margin="40,30,40,40">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1.5*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- INGRÉDIENTS (les cartes sont créées depuis le CS) -->
+                    <StackPanel Grid.Column="0" Margin="0,0,30,0">
+                        <TextBlock Text="Ingredients"
+                                   Foreground="White" FontSize="26"
+                                   FontWeight="Bold" Margin="0,0,0,20"/>
+                        <StackPanel x:Name="PanneauIngredients"/>
+                    </StackPanel>
+
+                    <!-- INSTRUCTIONS -->
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Preparation Steps"
+                                   Foreground="White" FontSize="26"
+                                   FontWeight="Bold" Margin="0,0,0,20"/>
+                        <Border Background="#1A1A1A" CornerRadius="16" Padding="25"
+                                BorderBrush="#2A2A2A" BorderThickness="1">
+                            <TextBlock x:Name="DetailInstructions"
+                                       Foreground="#CCCCCC" FontSize="14"
+                                       LineHeight="26" TextWrapping="Wrap"/>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>
