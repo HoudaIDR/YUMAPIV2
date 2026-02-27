@@ -9,7 +9,7 @@
 
     <Grid>
 
-        <!-- Message d'accueil (visible au départ) -->
+        <!-- Message d'accueil -->
         <StackPanel x:Name="PanneauAccueil"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -24,41 +24,53 @@
                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
         </StackPanel>
 
-        <!-- Détail recette (caché au départ) -->
+        <!-- Détail recette -->
         <ScrollViewer x:Name="PanneauDetail"
                       Visibility="Collapsed"
                       VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="380"/>
-                    <!-- Image hero -->
                     <RowDefinition Height="*"/>
-                    <!-- Corps -->
                 </Grid.RowDefinitions>
 
-                <!-- ── IMAGE HERO ── -->
+                <!-- IMAGE HERO -->
                 <Grid Grid.Row="0">
-                    <Image x:Name="DetailImage"
-                           Stretch="UniformToFill" Opacity="0.6"/>
+                    <Image x:Name="DetailImage" Stretch="UniformToFill" Opacity="0.6"/>
                     <Border Background="#88000000"/>
 
                     <Grid VerticalAlignment="Bottom" Margin="40,0,40,30">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Tags -->
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <!-- Tags + bouton ❤ -->
+                        <StackPanel Grid.Row="0" Orientation="Horizontal"
+                                    Margin="0,0,0,12" VerticalAlignment="Center">
+
                             <Border Background="#FF6B35" CornerRadius="20" Padding="14,6">
                                 <TextBlock x:Name="TagCategorie"
                                            Foreground="White" FontSize="11" FontWeight="Bold"/>
                             </Border>
+
                             <Border Background="#333333" CornerRadius="20"
                                     Padding="14,6" Margin="8,0,0,0">
                                 <TextBlock x:Name="TagPays"
                                            Foreground="White" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+
+                            <!-- Bouton ❤ rond orange -->
+                            <Border x:Name="BoutonFavoriDetail"
+                                    Background="#FF6B35" Width="36" Height="36"
+                                    CornerRadius="18" Margin="12,0,0,0"
+                                    Cursor="Hand"
+                                    MouseDown="BtnFavoriDetail_Click">
+                                <TextBlock x:Name="CoeurDetail"
+                                           Text="🤍" FontSize="16"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           IsHitTestVisible="False"/>
                             </Border>
                         </StackPanel>
 
@@ -68,19 +80,16 @@
                                    Foreground="White" FontSize="48"
                                    FontWeight="Black" TextWrapping="Wrap"
                                    Margin="0,0,0,16"/>
-
-                        
                     </Grid>
                 </Grid>
 
-                <!-- ── CORPS : ingrédients + instructions ── -->
+                <!-- CORPS : ingrédients + instructions -->
                 <Grid Grid.Row="1" Margin="40,30,40,40">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
                         <ColumnDefinition Width="1.5*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- INGRÉDIENTS (les cartes sont créées depuis le CS) -->
                     <StackPanel Grid.Column="0" Margin="0,0,30,0">
                         <TextBlock Text="Ingredients"
                                    Foreground="White" FontSize="26"
@@ -88,7 +97,6 @@
                         <StackPanel x:Name="PanneauIngredients"/>
                     </StackPanel>
 
-                    <!-- INSTRUCTIONS -->
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="Preparation Steps"
                                    Foreground="White" FontSize="26"
