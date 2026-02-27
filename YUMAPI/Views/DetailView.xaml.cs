@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using YUMAPI.Controllers;
 using YUMAPI.Models;
 
@@ -20,23 +13,33 @@ namespace YUMAPI.Views
     {
         private MealController _controller = new MealController();
 
+        // On garde la recette actuelle en mémoire pour le bouton ❤
+        private MealListItem _recetteActuelle;
+
         public DetailView()
         {
             InitializeComponent();
         }
 
-        // Méthode publique appelée depuis MainWindow
-        // (comme ChargerMeteo(ville) dans MeteoHouda)
         public async void ChargerDetail(string id)
         {
             await _controller.ChargerDetailAsync(id);
 
             MealDto recette = _controller.DetailRecette;
+            if (recette == null) return;
 
-            if (recette == null)
-                return;
+            // On crée un MealListItem pour les favoris (Id + Title + Thumb)
+            _recetteActuelle = new MealListItem
+            {
+                Id = recette.idMeal,
+                Title = recette.strMeal,
+                Thumb = recette.strMealThumb
+            };
 
-            // Basculer l'affichage
+            // On met à jour l'emoji ❤ selon si elle est déjà en favori
+            CoeurDetail.Text = FavorisManager.EstFavori(id) ? "❤️" : "🤍";
+
+            // Afficher le panneau détail
             PanneauAccueil.Visibility = Visibility.Collapsed;
             PanneauDetail.Visibility = Visibility.Visible;
 
@@ -46,13 +49,11 @@ namespace YUMAPI.Views
             TagPays.Text = recette.strArea;
             DetailInstructions.Text = recette.strInstructions;
 
-            // Image
             if (!string.IsNullOrEmpty(recette.strMealThumb))
                 DetailImage.Source = new BitmapImage(new Uri(recette.strMealThumb));
 
-            // Ingrédients : vider puis recréer les cartes
+            // Ingrédients
             PanneauIngredients.Children.Clear();
-
             AjouterCarteIngredient(recette.strMeasure1, recette.strIngredient1);
             AjouterCarteIngredient(recette.strMeasure2, recette.strIngredient2);
             AjouterCarteIngredient(recette.strMeasure3, recette.strIngredient3);
@@ -65,13 +66,22 @@ namespace YUMAPI.Views
             AjouterCarteIngredient(recette.strMeasure10, recette.strIngredient10);
         }
 
-        // Crée une carte ingrédient avec badge orange (comme le screenshot)
+        // ── Clic ❤ dans la page détail ───────────────────────────────────
+        private void BtnFavoriDetail_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (_recetteActuelle == null) return;
+
+            FavorisManager.BasculerFavori(_recetteActuelle);
+
+            // Met à jour l'emoji
+            CoeurDetail.Text = FavorisManager.EstFavori(_recetteActuelle.Id) ? "❤️" : "🤍";
+        }
+
+        // ── Carte ingrédient ──────────────────────────────────────────────
         private void AjouterCarteIngredient(string mesure, string ingredient)
         {
-            if (string.IsNullOrWhiteSpace(ingredient))
-                return;
+            if (string.IsNullOrWhiteSpace(ingredient)) return;
 
-            // Carte
             Border carte = new Border();
             carte.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E"));
             carte.CornerRadius = new CornerRadius(10);
@@ -80,12 +90,10 @@ namespace YUMAPI.Views
             carte.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
             carte.BorderThickness = new Thickness(1);
 
-            // Grille intérieure
             Grid grille = new Grid();
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(44) });
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // Badge mesure (cercle orange)
             Border badge = new Border();
             badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
             badge.CornerRadius = new CornerRadius(22);
@@ -105,7 +113,6 @@ namespace YUMAPI.Views
             Grid.SetColumn(badge, 0);
             grille.Children.Add(badge);
 
-            // Nom ingrédient
             TextBlock txIngredient = new TextBlock();
             txIngredient.Text = ingredient.Trim();
             txIngredient.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC"));
