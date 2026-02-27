@@ -14,6 +14,8 @@
                 <RowDefinition Height="Auto"/>
                 <!-- Recherche -->
                 <RowDefinition Height="Auto"/>
+                <!-- Bouton Toutes les recettes -->
+                <RowDefinition Height="Auto"/>
                 <!-- Langue -->
                 <RowDefinition Height="Auto"/>
                 <!-- Titre section -->
@@ -70,12 +72,13 @@
                                IsHitTestVisible="False"/>
 
                     <TextBox x:Name="SearchBox"
-                             Grid.Column="1"
-                             Background="Transparent" Foreground="White"
-                             BorderThickness="0" FontSize="13"
-                             Padding="10,12" VerticalContentAlignment="Center"
-                             CaretBrush="White"
-                             KeyDown="SearchBox_KeyDown"/>
+         Grid.Column="1"
+         Background="Transparent" Foreground="White"
+         BorderThickness="0" FontSize="13"
+         Padding="10,12" VerticalContentAlignment="Center"
+         CaretBrush="White"
+         KeyDown="SearchBox_KeyDown"
+         TextChanged="SearchBox_TextChanged"/>
 
                     <Button x:Name="BtnRechercher"
                             Grid.Column="2"
@@ -92,12 +95,65 @@
                 </Grid>
             </Border>
 
+            <!-- BOUTON TOUTES LES RECETTES -->
+            <Border Grid.Row="2" Margin="20,0,20,16"
+                    Background="#242424" CornerRadius="12"
+                    BorderBrush="#333333" BorderThickness="1">
+                <Button x:Name="BtnToutesLesRecettes"
+                        Background="Transparent" Foreground="White"
+                        BorderThickness="0" FontSize="13" FontWeight="SemiBold"
+                        Padding="14,12"
+                        HorizontalContentAlignment="Left"
+                        Click="BtnToutesLesRecettes_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="🍽️"
+                                               FontSize="15" VerticalAlignment="Center"
+                                               Margin="0,0,10,0"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text="Toutes les recettes"
+                                               Foreground="White" FontSize="13"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"/>
+                                    <Border Grid.Column="2"
+                                            Background="#FF6B35"
+                                            CornerRadius="8"
+                                            Padding="8,4">
+                                        <TextBlock x:Name="TxtCount"
+                                                   Text="ALL"
+                                                   Foreground="White"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2E2E2E"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#333333"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Border>
+
             <!-- SÉLECTEUR DE LANGUE -->
-            <Border Grid.Row="2" Margin="20,0,20,20"
+            <Border Grid.Row="3" Margin="20,0,20,20"
                     Background="#242424" CornerRadius="10"
                     BorderBrush="#333333" BorderThickness="1">
                 <ComboBox x:Name="LanguageSelector"
-                          Background="Transparent" Foreground="White"
+                          Background="Transparent" Foreground="Black"
                           BorderThickness="0" FontSize="13" Padding="12,10">
                     <ComboBoxItem Content="🇺🇸  English (US)" Tag="en" IsSelected="True"/>
                     <ComboBoxItem Content="🇫🇷  Français"     Tag="fr"/>
@@ -106,14 +162,15 @@
             </Border>
 
             <!-- TITRE SECTION -->
-            <TextBlock Grid.Row="3"
+            <TextBlock x:Name="TxtSectionTitle"
+                       Grid.Row="4"
                        Text="FEATURED COLLECTION"
                        Foreground="#555555" FontSize="10" FontWeight="SemiBold"
                        Margin="20,0,20,12"/>
 
             <!-- LISTE DES RECETTES -->
             <ListView x:Name="ListeRecettes"
-                      Grid.Row="4"
+                      Grid.Row="5"
                       Margin="12,0,12,12"
                       Background="Transparent" BorderThickness="0"
                       SelectionChanged="ListeRecettes_SelectionChanged">
@@ -146,10 +203,6 @@
                                                Foreground="White" FontSize="13"
                                                FontWeight="SemiBold"
                                                TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Foreground="#888888" FontSize="11" Margin="0,4,0,0">
-                                        <Run Text="⏱ 20 min  •  "/>
-                                        <Run Text="{Binding Category}"/>
-                                    </TextBlock>
                                 </StackPanel>
                             </Grid>
                         </Border>

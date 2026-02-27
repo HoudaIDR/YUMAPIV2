@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using YUMAPI.Controllers;
 using YUMAPI.Models;
 
@@ -20,7 +13,6 @@ namespace YUMAPI.Views
     {
         private MealController _controller = new MealController();
 
-        // Événement pour dire à MainWindow quelle recette a été cliquée
         public delegate void RecetteCliqueeHandler(string id);
         public event RecetteCliqueeHandler RecetteCliquee;
 
@@ -28,7 +20,6 @@ namespace YUMAPI.Views
         {
             InitializeComponent();
 
-            // Charger des recettes au démarrage
             Loaded += async (s, e) =>
             {
                 await _controller.RechercherAsync("chicken");
@@ -36,14 +27,34 @@ namespace YUMAPI.Views
             };
         }
 
-        // ── Touche Entrée dans la recherche ───────────────────────────────
-        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        private async void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (e.Key == Key.Enter)
-                BtnRechercher_Click(sender, null);
+            string motCle = SearchBox.Text;
+
+            if (string.IsNullOrEmpty(motCle))
+            {
+                TxtSectionTitle.Text = "FEATURED COLLECTION";
+                return;
+            }
+
+            await Task.Delay(400);
+
+            if (motCle != SearchBox.Text)
+                return;
+
+            TxtSectionTitle.Text = "RECHERCHE...";
+            await _controller.RechercherAsync(motCle);
+
+            ListeRecettes.ItemsSource = _controller.ListeRecettes;
+
+            int nombre = _controller.ListeRecettes?.Count ?? 0;
+
+            if (nombre > 0)
+                TxtSectionTitle.Text = $"RÉSULTATS : {nombre}";
+            else
+                TxtSectionTitle.Text = "AUCUN RÉSULTAT";
         }
 
-        // ── Clic bouton rechercher ─────────────────────────────────────────
         private async void BtnRechercher_Click(object sender, RoutedEventArgs e)
         {
             string motCle = SearchBox.Text;
@@ -53,9 +64,43 @@ namespace YUMAPI.Views
 
             await _controller.RechercherAsync(motCle);
             ListeRecettes.ItemsSource = _controller.ListeRecettes;
+            TxtSectionTitle.Text = $"RÉSULTATS POUR \"{motCle.ToUpper()}\"";
         }
 
-        // ── Clic sur une recette → prévient MainWindow ─────────────────────
+        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                BtnRechercher_Click(sender, null);
+        }
+
+        private async void BtnToutesLesRecettes_Click(object sender, RoutedEventArgs e)
+        {
+            BtnToutesLesRecettes.IsEnabled = false;
+            TxtSectionTitle.Text = "CHARGEMENT...";
+
+            var toutesLesRecettes = new List<MealListItem>();
+
+            string alphabet = "abcdefghijklmnopqrstuvwxyz";
+            foreach (char lettre in alphabet)
+            {
+                await _controller.RechercherAsync(lettre.ToString());
+
+                if (_controller.ListeRecettes != null)
+                    toutesLesRecettes.AddRange(_controller.ListeRecettes);
+            }
+
+            var sansDoublons = toutesLesRecettes
+                .GroupBy(r => r.Id)
+                .Select(g => g.First())
+                .OrderBy(r => r.Title)
+                .ToList();
+
+            ListeRecettes.ItemsSource = sansDoublons;
+            TxtSectionTitle.Text = $"ALL RECIPES ({sansDoublons.Count})";
+
+            BtnToutesLesRecettes.IsEnabled = true;
+        }
+
         private void ListeRecettes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             MealListItem recette = ListeRecettes.SelectedItem as MealListItem;
@@ -63,7 +108,6 @@ namespace YUMAPI.Views
             if (recette == null)
                 return;
 
-            // Envoyer l'ID à MainWindow (qui appellera DetailView)
             if (RecetteCliquee != null)
                 RecetteCliquee(recette.Id);
         }

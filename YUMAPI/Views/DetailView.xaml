@@ -69,24 +69,7 @@
                                    FontWeight="Black" TextWrapping="Wrap"
                                    Margin="0,0,0,16"/>
 
-                        <!-- Stats -->
-                        <StackPanel Grid.Row="2" Orientation="Horizontal">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-                                <TextBlock Text="⏱" FontSize="18" Foreground="White" Margin="0,0,8,0"/>
-                                <TextBlock Text="30 Minutes Prep" Foreground="White"
-                                           FontSize="14" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,30,0">
-                                <TextBlock Text="👤" FontSize="18" Foreground="White" Margin="0,0,8,0"/>
-                                <TextBlock Text="Serves 2" Foreground="White"
-                                           FontSize="14" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🔥" FontSize="18" Foreground="White" Margin="0,0,8,0"/>
-                                <TextBlock Text="450 kcal" Foreground="White"
-                                           FontSize="14" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </StackPanel>
+                        
                     </Grid>
                 </Grid>
 
