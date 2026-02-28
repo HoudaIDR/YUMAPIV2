@@ -10,18 +10,13 @@
         Background="#111111">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="360"/>
-            <!-- ListeView -->
-            <ColumnDefinition Width="*"/>
-            <!-- DetailView -->
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <!-- Pages (login / recettes) -->
+        </Grid.RowDefinitions>
 
-        <!-- Colonne gauche : liste des recettes -->
-        <Grid x:Name="ContainerListe" Grid.Column="0"/>
-
-        <!-- Colonne droite : détail de la recette -->
-        <Grid x:Name="ContainerDetail" Grid.Column="1"/>
+        <!-- Container principal : affiche login OU les recettes -->
+        <Grid x:Name="ContainerPrincipal" Grid.Row="0"/>
     </Grid>
 
 </Window>
