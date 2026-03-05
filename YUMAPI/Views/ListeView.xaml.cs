@@ -40,9 +40,7 @@ namespace YUMAPI.Views
             }
 
             await Task.Delay(400);
-
-            if (motCle != SearchBox.Text)
-                return;
+            if (motCle != SearchBox.Text) return;
 
             TxtSectionTitle.Text = "RECHERCHE...";
             await _controller.RechercherAsync(motCle);
@@ -73,21 +71,15 @@ namespace YUMAPI.Views
         // ── Clic ❤ sur une recette ────────────────────────────────────────
         private void BtnCoeur_Click(object sender, MouseButtonEventArgs e)
         {
-            // Le sender est le Border orange sur lequel on a cliqué
             Border bouton = sender as Border;
-            // Le Tag contient la recette (Tag="{Binding}" dans le XAML)
             MealListItem recette = bouton.Tag as MealListItem;
-
             if (recette == null) return;
 
-            // On ajoute ou retire des favoris (et ça sauvegarde automatiquement)
             FavorisManager.BasculerFavori(recette);
 
-            // On cherche le TextBlock ❤ à l'intérieur du Border pour changer l'emoji
             TextBlock coeur = bouton.Child as TextBlock;
             coeur.Text = FavorisManager.EstFavori(recette.Id) ? "❤️" : "🤍";
 
-            // Empêche le clic de sélectionner la recette dans la liste
             e.Handled = true;
         }
 
@@ -96,24 +88,25 @@ namespace YUMAPI.Views
         {
             if (TxtSectionTitle.Text == "❤️ MES FAVORIS")
             {
-                // On revient aux recettes normales
                 TxtSectionTitle.Text = "FEATURED COLLECTION";
                 ListeRecettes.ItemsSource = _controller.ListeRecettes;
                 BtnFavorisHaut.Text = "🤍";
-                BordureFavorisHaut.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+                BordureFavorisHaut.Background = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString("#FF6B35")
+                );
             }
             else
             {
-                // On affiche les favoris
                 TxtSectionTitle.Text = "❤️ MES FAVORIS";
                 ListeRecettes.ItemsSource = FavorisManager.Favoris;
                 BtnFavorisHaut.Text = "❤️";
-                // On passe le fond en rouge foncé pour montrer qu'on est en mode favoris
-                BordureFavorisHaut.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CC0000"));
+                BordureFavorisHaut.Background = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString("#CC0000")
+                );
             }
         }
 
-        // ── Clic bouton "Toutes les recettes" ────────────────────────────
+        // ── Clic "Toutes les recettes" ────────────────────────────────────
         private async void BtnToutesLesRecettes_Click(object sender, RoutedEventArgs e)
         {
             BtnToutesLesRecettes.IsEnabled = false;

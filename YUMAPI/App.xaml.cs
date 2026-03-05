@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using YUMAPI.Models;
+using YUMAPI.Controllers;
 
 namespace YUMAPI
 {

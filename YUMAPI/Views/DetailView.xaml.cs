@@ -12,8 +12,6 @@ namespace YUMAPI.Views
     public partial class DetailView : UserControl
     {
         private MealController _controller = new MealController();
-
-        // On garde la recette actuelle en mémoire pour le bouton ❤
         private MealListItem _recetteActuelle;
 
         public DetailView()
@@ -28,7 +26,7 @@ namespace YUMAPI.Views
             MealDto recette = _controller.DetailRecette;
             if (recette == null) return;
 
-            // On crée un MealListItem pour les favoris (Id + Title + Thumb)
+            // On mémorise la recette pour le bouton ❤
             _recetteActuelle = new MealListItem
             {
                 Id = recette.idMeal,
@@ -36,19 +34,23 @@ namespace YUMAPI.Views
                 Thumb = recette.strMealThumb
             };
 
-            // On met à jour l'emoji ❤ selon si elle est déjà en favori
+            // On applique la couleur du thème actuel
+            AppliquerCouleur();
+
+            // Emoji ❤ selon si déjà en favori
             CoeurDetail.Text = FavorisManager.EstFavori(id) ? "❤️" : "🤍";
 
-            // Afficher le panneau détail
+            // Afficher le panneau détail et cacher l'accueil
             PanneauAccueil.Visibility = Visibility.Collapsed;
             PanneauDetail.Visibility = Visibility.Visible;
 
-            // Remplir les champs
+            // Remplir les champs texte
             DetailTitre.Text = recette.strMeal;
             TagCategorie.Text = recette.strCategory;
             TagPays.Text = recette.strArea;
             DetailInstructions.Text = recette.strInstructions;
 
+            // Image
             if (!string.IsNullOrEmpty(recette.strMealThumb))
                 DetailImage.Source = new BitmapImage(new Uri(recette.strMealThumb));
 
@@ -66,22 +68,34 @@ namespace YUMAPI.Views
             AjouterCarteIngredient(recette.strMeasure10, recette.strIngredient10);
         }
 
-        // ── Clic ❤ dans la page détail ───────────────────────────────────
+        // ── Applique la couleur accent sur les éléments de cette vue ──────
+        public void AppliquerCouleur()
+        {
+            SolidColorBrush brosse = ThemeManager.CouleurAccent;
+
+            // Tag catégorie
+            TagCategorieBorder.Background = brosse;
+
+            // Bouton ❤
+            BoutonFavoriDetail.Background = brosse;
+        }
+
+        // ── Clic ❤ ───────────────────────────────────────────────────────
         private void BtnFavoriDetail_Click(object sender, MouseButtonEventArgs e)
         {
             if (_recetteActuelle == null) return;
 
             FavorisManager.BasculerFavori(_recetteActuelle);
-
-            // Met à jour l'emoji
             CoeurDetail.Text = FavorisManager.EstFavori(_recetteActuelle.Id) ? "❤️" : "🤍";
         }
 
-        // ── Carte ingrédient ──────────────────────────────────────────────
+        // ── Crée et ajoute une carte ingrédient ──────────────────────────
         private void AjouterCarteIngredient(string mesure, string ingredient)
         {
+            // Si pas d'ingrédient, on ne crée pas de carte
             if (string.IsNullOrWhiteSpace(ingredient)) return;
 
+            // Carte (fond gris foncé, bords arrondis)
             Border carte = new Border();
             carte.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E"));
             carte.CornerRadius = new CornerRadius(10);
@@ -90,12 +104,14 @@ namespace YUMAPI.Views
             carte.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
             carte.BorderThickness = new Thickness(1);
 
+            // Grille à 2 colonnes : badge mesure | nom ingrédient
             Grid grille = new Grid();
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(44) });
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
+            // Badge rond coloré avec la mesure
             Border badge = new Border();
-            badge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+            badge.Background = ThemeManager.CouleurAccent;  // <-- couleur du thème
             badge.CornerRadius = new CornerRadius(22);
             badge.Width = 44;
             badge.Height = 44;
@@ -113,6 +129,7 @@ namespace YUMAPI.Views
             Grid.SetColumn(badge, 0);
             grille.Children.Add(badge);
 
+            // Nom de l'ingrédient
             TextBlock txIngredient = new TextBlock();
             txIngredient.Text = ingredient.Trim();
             txIngredient.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC"));
