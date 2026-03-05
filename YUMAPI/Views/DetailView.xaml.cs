@@ -9,24 +9,38 @@ using YUMAPI.Models;
 
 namespace YUMAPI.Views
 {
+    /// <summary>
+    /// Vue qui affiche le détail complet d’une recette.
+    /// Elle charge les informations depuis l’API et met à jour l’interface.
+    /// </summary>
     public partial class DetailView : UserControl
     {
+        // Contrôleur qui récupère les données depuis l’API
         private MealController _controller = new MealController();
+
+        // Recette actuellement affichée (utile pour la gestion des favoris)
         private MealListItem _recetteActuelle;
 
+        /// <summary>
+        /// Constructeur : initialise la vue.
+        /// </summary>
         public DetailView()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Charge le détail d’une recette à partir de son ID.
+        /// </summary>
         public async void ChargerDetail(string id)
         {
+            // Appel API pour récupérer le détail
             await _controller.ChargerDetailAsync(id);
 
             MealDto recette = _controller.DetailRecette;
             if (recette == null) return;
 
-            // On mémorise la recette pour le bouton ❤
+            // On mémorise la recette pour le bouton Favori
             _recetteActuelle = new MealListItem
             {
                 Id = recette.idMeal,
@@ -34,28 +48,30 @@ namespace YUMAPI.Views
                 Thumb = recette.strMealThumb
             };
 
-            // On applique la couleur du thème actuel
+            // Appliquer la couleur du thème actif
             AppliquerCouleur();
 
-            // Emoji ❤ selon si déjà en favori
+            // Mettre à jour l’icône cœur selon si déjà en favori
             CoeurDetail.Text = FavorisManager.EstFavori(id) ? "❤️" : "🤍";
 
-            // Afficher le panneau détail et cacher l'accueil
+            // Afficher le panneau détail et masquer l’écran d’accueil
             PanneauAccueil.Visibility = Visibility.Collapsed;
             PanneauDetail.Visibility = Visibility.Visible;
 
-            // Remplir les champs texte
+            // Remplissage des champs texte
             DetailTitre.Text = recette.strMeal;
             TagCategorie.Text = recette.strCategory;
             TagPays.Text = recette.strArea;
             DetailInstructions.Text = recette.strInstructions;
 
-            // Image
+            // Chargement de l’image si disponible
             if (!string.IsNullOrEmpty(recette.strMealThumb))
                 DetailImage.Source = new BitmapImage(new Uri(recette.strMealThumb));
 
-            // Ingrédients
+            // Nettoyer les anciens ingrédients
             PanneauIngredients.Children.Clear();
+
+            // Ajouter les cartes ingrédients (limité ici à 10)
             AjouterCarteIngredient(recette.strMeasure1, recette.strIngredient1);
             AjouterCarteIngredient(recette.strMeasure2, recette.strIngredient2);
             AjouterCarteIngredient(recette.strMeasure3, recette.strIngredient3);
@@ -68,80 +84,104 @@ namespace YUMAPI.Views
             AjouterCarteIngredient(recette.strMeasure10, recette.strIngredient10);
         }
 
-        // ── Applique la couleur accent sur les éléments de cette vue ──────
+        // ─────────────────────────────────────────────────────────────
+        // 🎨 Applique la couleur accent du thème
+        // ─────────────────────────────────────────────────────────────
         public void AppliquerCouleur()
         {
+            // Récupère la couleur définie dans le ThemeManager
             SolidColorBrush brosse = ThemeManager.CouleurAccent;
 
-            // Tag catégorie
+            // Applique la couleur au tag catégorie
             TagCategorieBorder.Background = brosse;
 
-            // Bouton ❤
+            // Applique la couleur au bouton Favori
             BoutonFavoriDetail.Background = brosse;
         }
 
-        // ── Clic ❤ ───────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────
+        // ❤️ Clic sur le bouton Favori
+        // ─────────────────────────────────────────────────────────────
         private void BtnFavoriDetail_Click(object sender, MouseButtonEventArgs e)
         {
             if (_recetteActuelle == null) return;
 
+            // Ajoute ou retire la recette des favoris
             FavorisManager.BasculerFavori(_recetteActuelle);
-            CoeurDetail.Text = FavorisManager.EstFavori(_recetteActuelle.Id) ? "❤️" : "🤍";
+
+            // Met à jour l’icône cœur
+            CoeurDetail.Text = FavorisManager.EstFavori(_recetteActuelle.Id)
+                ? "❤️"
+                : "🤍";
         }
 
-        // ── Crée et ajoute une carte ingrédient ──────────────────────────
+        // ─────────────────────────────────────────────────────────────
+        // 🥕 Crée dynamiquement une carte ingrédient
+        // ─────────────────────────────────────────────────────────────
         private void AjouterCarteIngredient(string mesure, string ingredient)
         {
-            // Si pas d'ingrédient, on ne crée pas de carte
+            // Si l’ingrédient est vide → on ne crée rien
             if (string.IsNullOrWhiteSpace(ingredient)) return;
 
-            // Carte (fond gris foncé, bords arrondis)
-            Border carte = new Border();
-            carte.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E"));
-            carte.CornerRadius = new CornerRadius(10);
-            carte.Padding = new Thickness(12, 10, 12, 10);
-            carte.Margin = new Thickness(0, 0, 0, 8);
-            carte.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A"));
-            carte.BorderThickness = new Thickness(1);
+            // Carte principale (fond sombre, coins arrondis)
+            Border carte = new Border
+            {
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E")),
+                CornerRadius = new CornerRadius(10),
+                Padding = new Thickness(12, 10, 12, 10),
+                Margin = new Thickness(0, 0, 0, 8),
+                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A")),
+                BorderThickness = new Thickness(1)
+            };
 
-            // Grille à 2 colonnes : badge mesure | nom ingrédient
+            // Grille interne à 2 colonnes
             Grid grille = new Grid();
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(44) });
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // Badge rond coloré avec la mesure
-            Border badge = new Border();
-            badge.Background = ThemeManager.CouleurAccent;  // <-- couleur du thème
-            badge.CornerRadius = new CornerRadius(22);
-            badge.Width = 44;
-            badge.Height = 44;
+            // Badge rond coloré pour la mesure
+            Border badge = new Border
+            {
+                Background = ThemeManager.CouleurAccent,
+                CornerRadius = new CornerRadius(22),
+                Width = 44,
+                Height = 44
+            };
 
-            TextBlock txMesure = new TextBlock();
-            txMesure.Text = string.IsNullOrWhiteSpace(mesure) ? "—" : mesure.Trim();
-            txMesure.Foreground = Brushes.White;
-            txMesure.FontSize = 11;
-            txMesure.FontWeight = FontWeights.Bold;
-            txMesure.HorizontalAlignment = HorizontalAlignment.Center;
-            txMesure.VerticalAlignment = VerticalAlignment.Center;
-            txMesure.TextAlignment = TextAlignment.Center;
+            // Texte de la mesure
+            TextBlock txMesure = new TextBlock
+            {
+                Text = string.IsNullOrWhiteSpace(mesure) ? "—" : mesure.Trim(),
+                Foreground = Brushes.White,
+                FontSize = 11,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextAlignment = TextAlignment.Center
+            };
+
             badge.Child = txMesure;
-
             Grid.SetColumn(badge, 0);
             grille.Children.Add(badge);
 
-            // Nom de l'ingrédient
-            TextBlock txIngredient = new TextBlock();
-            txIngredient.Text = ingredient.Trim();
-            txIngredient.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC"));
-            txIngredient.FontSize = 14;
-            txIngredient.VerticalAlignment = VerticalAlignment.Center;
-            txIngredient.Margin = new Thickness(12, 0, 0, 0);
-            txIngredient.TextWrapping = TextWrapping.Wrap;
+            // Texte du nom d’ingrédient
+            TextBlock txIngredient = new TextBlock
+            {
+                Text = ingredient.Trim(),
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")),
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(12, 0, 0, 0),
+                TextWrapping = TextWrapping.Wrap
+            };
 
             Grid.SetColumn(txIngredient, 1);
             grille.Children.Add(txIngredient);
 
+            // Ajout de la grille à la carte
             carte.Child = grille;
+
+            // Ajout de la carte au panneau
             PanneauIngredients.Children.Add(carte);
         }
     }
