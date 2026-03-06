@@ -3,7 +3,7 @@ using System.IO;
 using System.Text.Json;
 using YUMAPI.Models;
 
-namespace YUMAPI.Models
+namespace YUMAPI.Controllers
 {
     public static class FavorisManager
     {
