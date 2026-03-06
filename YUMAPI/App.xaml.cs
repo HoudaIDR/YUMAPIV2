@@ -1,14 +1,16 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using YUMAPI.Controllers;
 
 namespace YUMAPI
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
-    }
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
 
+            // On charge les favoris dès le lancement de l'appli
+            FavorisManager.Charger();
+        }
+    }
 }
