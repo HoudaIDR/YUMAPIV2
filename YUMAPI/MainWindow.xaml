@@ -10,18 +10,7 @@
         Background="#111111">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="360"/>
-            <!-- ListeView -->
-            <ColumnDefinition Width="*"/>
-            <!-- DetailView -->
-        </Grid.ColumnDefinitions>
-
-        <!-- Colonne gauche : liste des recettes -->
-        <Grid x:Name="ContainerListe" Grid.Column="0"/>
-
-        <!-- Colonne droite : détail de la recette -->
-        <Grid x:Name="ContainerDetail" Grid.Column="1"/>
+        <Grid x:Name="ContainerPrincipal"/>
     </Grid>
 
 </Window>

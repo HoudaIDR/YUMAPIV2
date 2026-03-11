@@ -15,6 +15,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- LOGO -->
@@ -38,6 +39,7 @@
                     <TextBlock Text="GOURMET STUDIO" Foreground="#666666" FontSize="9" FontWeight="SemiBold"/>
                 </StackPanel>
 
+                <!-- Bouton ❤ favoris -->
                 <Border Grid.Column="2"
                         x:Name="BordureFavorisHaut"
                         Background="#FF6B35" Width="36" Height="36"
@@ -159,10 +161,10 @@
                       SelectionChanged="ListeRecettes_SelectionChanged">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
-                        <Setter Property="Background"              Value="Transparent"/>
-                        <Setter Property="BorderThickness"         Value="0"/>
-                        <Setter Property="Padding"                 Value="0"/>
-                        <Setter Property="Margin"                  Value="0,0,0,6"/>
+                        <Setter Property="Background"                 Value="Transparent"/>
+                        <Setter Property="BorderThickness"            Value="0"/>
+                        <Setter Property="Padding"                    Value="0"/>
+                        <Setter Property="Margin"                     Value="0,0,0,6"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     </Style>
                 </ListView.ItemContainerStyle>
@@ -188,6 +190,7 @@
                                                TextTrimming="CharacterEllipsis"/>
                                 </StackPanel>
 
+                                <!-- Bouton ❤ -->
                                 <Border Grid.Column="2"
                                         Background="#FF6B35" Width="32" Height="32"
                                         CornerRadius="16" Margin="8,0,0,0"
@@ -204,6 +207,53 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+
+            <!-- BARRE UTILISATEUR -->
+            <Border Grid.Row="6"
+                    Background="#111111"
+                    BorderBrush="#2A2A2A" BorderThickness="0,1,0,0"
+                    Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Avatar -->
+                    <Border Grid.Column="0"
+                            Background="#FF6B35" Width="38" Height="38"
+                            CornerRadius="19">
+                        <TextBlock x:Name="TxtAvatar"
+                                   Text="?" Foreground="White"
+                                   FontSize="16" FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Nom utilisateur -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <TextBlock x:Name="TxtUsername"
+                                   Text="Utilisateur"
+                                   Foreground="White" FontSize="13"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Text="Membre"
+                                   Foreground="#666666" FontSize="10"/>
+                    </StackPanel>
+
+                    <!-- Bouton déconnexion -->
+                    <Border Grid.Column="2"
+                            Background="#222222" Width="36" Height="36"
+                            CornerRadius="10" Cursor="Hand"
+                            ToolTip="Se déconnecter"
+                            MouseDown="BtnDeconnecter_Click">
+                        <TextBlock Text="⏻" Foreground="#FF5555"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
+            </Border>
 
         </Grid>
     </Border>
