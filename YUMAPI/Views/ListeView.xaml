@@ -39,59 +39,102 @@
                     <TextBlock Text="GOURMET STUDIO" Foreground="#666666" FontSize="9" FontWeight="SemiBold"/>
                 </StackPanel>
 
-                <!-- Bouton ❤ favoris -->
                 <Border Grid.Column="2"
                         x:Name="BordureFavorisHaut"
                         Background="#FF6B35" Width="36" Height="36"
                         CornerRadius="18" VerticalAlignment="Center"
-                        Cursor="Hand"
-                        MouseDown="BtnFavorisHaut_Click">
-                    <TextBlock x:Name="BtnFavorisHaut"
-                               Text="🤍" FontSize="15"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
+                        Cursor="Hand" MouseDown="BtnFavorisHaut_Click">
+                    <TextBlock x:Name="BtnFavorisHaut" Text="🤍" FontSize="15"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
             </Grid>
 
-            <!-- BARRE DE RECHERCHE -->
-            <Border Grid.Row="1" Margin="20,0,20,16"
-                    Background="#242424" CornerRadius="12"
-                    BorderBrush="#333333" BorderThickness="1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <!-- BARRE DE RECHERCHE + AUTOCOMPLÉTION -->
+            <Grid Grid.Row="1" Margin="20,0,20,16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="🔍"
-                               FontSize="15" Foreground="#666666"
-                               VerticalAlignment="Center" Margin="14,0,0,0"
-                               IsHitTestVisible="False"/>
+                <!-- Barre de recherche -->
+                <Border Grid.Row="0" Background="#242424" CornerRadius="12"
+                        BorderBrush="#333333" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="SearchBox"
-                             Grid.Column="1"
-                             Background="Transparent" Foreground="White"
-                             BorderThickness="0" FontSize="13"
-                             Padding="10,12" VerticalContentAlignment="Center"
-                             CaretBrush="White"
-                             KeyDown="SearchBox_KeyDown"
-                             TextChanged="SearchBox_TextChanged"/>
+                        <TextBlock Grid.Column="0" Text="🔍"
+                                   FontSize="15" Foreground="#666666"
+                                   VerticalAlignment="Center" Margin="14,0,0,0"
+                                   IsHitTestVisible="False"/>
 
-                    <Button x:Name="BtnRechercher"
-                            Grid.Column="2"
-                            Content="→" Width="36" Height="36" Margin="4"
-                            Background="#FF6B35" Foreground="White"
-                            FontSize="16" FontWeight="Bold" BorderThickness="0"
-                            Click="BtnRechercher_Click">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="10"/>
+                        <TextBox x:Name="SearchBox"
+                                 Grid.Column="1"
+                                 Background="Transparent" Foreground="White"
+                                 BorderThickness="0" FontSize="13"
+                                 Padding="10,12" VerticalContentAlignment="Center"
+                                 CaretBrush="White"
+                                 KeyDown="SearchBox_KeyDown"
+                                 TextChanged="SearchBox_TextChanged"/>
+
+                        <Button x:Name="BtnRechercher"
+                                Grid.Column="2"
+                                Content="→" Width="36" Height="36" Margin="4"
+                                Background="#FF6B35" Foreground="White"
+                                FontSize="16" FontWeight="Bold" BorderThickness="0"
+                                Click="BtnRechercher_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="10"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- LISTE AUTOCOMPLÉTION (par-dessus tout) -->
+                <Border Grid.Row="1"
+                        x:Name="PanneauAutoComplete"
+                        Background="#1E1E1E"
+                        CornerRadius="0,0,12,12"
+                        BorderBrush="#FF6B35" BorderThickness="1,0,1,1"
+                        Visibility="Collapsed"
+                        Panel.ZIndex="99">
+                    <ListView x:Name="ListeAutoComplete"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              MaxHeight="220"
+                              SelectionChanged="AutoComplete_SelectionChanged"
+                              PreviewMouseDown="ListeAutoComplete_PreviewMouseDown">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="14,9"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#2A2A2A"/>
+                                    </Trigger>
+                                </Style.Triggers>
                             </Style>
-                        </Button.Resources>
-                    </Button>
-                </Grid>
-            </Border>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🔍 " Foreground="#666666"
+                                               FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Title}"
+                                               Foreground="#CCCCCC" FontSize="13"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Border>
+            </Grid>
 
             <!-- BOUTON TOUTES LES RECETTES -->
             <Border Grid.Row="2" Margin="20,0,20,16"
@@ -141,7 +184,8 @@
                     BorderBrush="#333333" BorderThickness="1">
                 <ComboBox x:Name="LanguageSelector"
                           Background="Transparent" Foreground="Black"
-                          BorderThickness="0" FontSize="13" Padding="12,10">
+                          BorderThickness="0" FontSize="13" Padding="12,10"
+                          SelectionChanged="LanguageSelector_SelectionChanged">
                     <ComboBoxItem Content="🇺🇸  English (US)" Tag="en" IsSelected="True"/>
                     <ComboBoxItem Content="🇫🇷  Français"     Tag="fr"/>
                     <ComboBoxItem Content="🇪🇸  Español"      Tag="es"/>
@@ -190,12 +234,10 @@
                                                TextTrimming="CharacterEllipsis"/>
                                 </StackPanel>
 
-                                <!-- Bouton ❤ -->
                                 <Border Grid.Column="2"
                                         Background="#FF6B35" Width="32" Height="32"
                                         CornerRadius="16" Margin="8,0,0,0"
-                                        Cursor="Hand"
-                                        Tag="{Binding}"
+                                        Cursor="Hand" Tag="{Binding}"
                                         MouseDown="BtnCoeur_Click">
                                     <TextBlock Text="🤍" FontSize="14"
                                                HorizontalAlignment="Center"
@@ -209,8 +251,7 @@
             </ListView>
 
             <!-- BARRE UTILISATEUR -->
-            <Border Grid.Row="6"
-                    Background="#111111"
+            <Border Grid.Row="6" Background="#111111"
                     BorderBrush="#2A2A2A" BorderThickness="0,1,0,0"
                     Padding="16,12">
                 <Grid>
@@ -220,35 +261,25 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Avatar -->
-                    <Border Grid.Column="0"
-                            Background="#FF6B35" Width="38" Height="38"
-                            CornerRadius="19">
-                        <TextBlock x:Name="TxtAvatar"
-                                   Text="?" Foreground="White"
+                    <Border Grid.Column="0" Background="#FF6B35"
+                            Width="38" Height="38" CornerRadius="19">
+                        <TextBlock x:Name="TxtAvatar" Text="?" Foreground="White"
                                    FontSize="16" FontWeight="Bold"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                     </Border>
 
-                    <!-- Nom utilisateur -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
-                        <TextBlock x:Name="TxtUsername"
-                                   Text="Utilisateur"
-                                   Foreground="White" FontSize="13"
-                                   FontWeight="SemiBold"/>
-                        <TextBlock Text="Membre"
-                                   Foreground="#666666" FontSize="10"/>
+                        <TextBlock x:Name="TxtUsername" Text="Utilisateur"
+                                   Foreground="White" FontSize="13" FontWeight="SemiBold"/>
+                        <TextBlock Text="Membre" Foreground="#666666" FontSize="10"/>
                     </StackPanel>
 
-                    <!-- Bouton déconnexion -->
-                    <Border Grid.Column="2"
-                            Background="#222222" Width="36" Height="36"
-                            CornerRadius="10" Cursor="Hand"
-                            ToolTip="Se déconnecter"
+                    <Border Grid.Column="2" Background="#222222"
+                            Width="36" Height="36" CornerRadius="10"
+                            Cursor="Hand" ToolTip="Se déconnecter"
                             MouseDown="BtnDeconnecter_Click">
-                        <TextBlock Text="⏻" Foreground="#FF5555"
-                                   FontSize="16"
+                        <TextBlock Text="⏻" Foreground="#FF5555" FontSize="16"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                     </Border>

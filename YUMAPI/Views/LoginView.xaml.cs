@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ============================================================
+//  Views/LoginView.xaml.cs
+//  + Sélecteur de langue qui traduit l'interface
+// ============================================================
+
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using YUMAPI.Controllers;
 using YUMAPI.Models;
 
 namespace YUMAPI.Views
@@ -27,9 +23,10 @@ namespace YUMAPI.Views
         public LoginView()
         {
             InitializeComponent();
+            // Appliquer la langue courante au chargement
+            Loaded += (s, e) => AppliquerLangue(TraductionService.LangueActuelle);
         }
 
-        // ── Vide les champs (appelé à chaque affichage) ───────────────────
         public void Vider()
         {
             UsernameBox.Text = "";
@@ -37,7 +34,83 @@ namespace YUMAPI.Views
             ErreurLogin.Visibility = Visibility.Collapsed;
         }
 
-        // ── Clic "Se connecter" ───────────────────────────────────────────
+        // ════════════════════════════════════════════════════════════
+        //  SÉLECTEUR DE LANGUE
+        // ════════════════════════════════════════════════════════════
+        private void BtnLangEN_Click(object sender, MouseButtonEventArgs e)
+        {
+            TraductionService.LangueActuelle = "en";
+            AppliquerLangue("en");
+        }
+
+        private void BtnLangFR_Click(object sender, MouseButtonEventArgs e)
+        {
+            TraductionService.LangueActuelle = "fr";
+            AppliquerLangue("fr");
+        }
+
+        private void BtnLangES_Click(object sender, MouseButtonEventArgs e)
+        {
+            TraductionService.LangueActuelle = "es";
+            AppliquerLangue("es");
+        }
+
+        private void AppliquerLangue(string langue)
+        {
+            // Mettre à jour les boutons (actif = orange, inactif = transparent)
+            SolidColorBrush orange = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+            SolidColorBrush transparent = new SolidColorBrush(Colors.Transparent);
+
+            BtnLangEN.Background = langue == "en" ? orange : transparent;
+            BtnLangFR.Background = langue == "fr" ? orange : transparent;
+            BtnLangES.Background = langue == "es" ? orange : transparent;
+
+            // Changer les couleurs du texte
+            SolidColorBrush blanc = new SolidColorBrush(Colors.White);
+            SolidColorBrush gris = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888"));
+
+            ((StackPanel)BtnLangEN.Child).Children[1].SetValue(TextBlock.ForegroundProperty, langue == "en" ? blanc : gris);
+            ((StackPanel)BtnLangFR.Child).Children[1].SetValue(TextBlock.ForegroundProperty, langue == "fr" ? blanc : gris);
+            ((StackPanel)BtnLangES.Child).Children[1].SetValue(TextBlock.ForegroundProperty, langue == "es" ? blanc : gris);
+
+            // Traduire l'interface selon la langue
+            switch (langue)
+            {
+                case "fr":
+                    TxtTitre.Text = "Connexion";
+                    TxtSousTitre.Text = "Bon retour parmi nous 👋";
+                    TxtLabelUsername.Text = "Nom d'utilisateur";
+                    TxtLabelPassword.Text = "Mot de passe";
+                    BtnConnecter.Content = "Se connecter";
+                    TxtPasDeCompte.Text = "Pas encore de compte ? ";
+                    LienInscription.Text = "Créer un compte";
+                    break;
+
+                case "es":
+                    TxtTitre.Text = "Iniciar sesión";
+                    TxtSousTitre.Text = "Bienvenido de nuevo 👋";
+                    TxtLabelUsername.Text = "Nombre de usuario";
+                    TxtLabelPassword.Text = "Contraseña";
+                    BtnConnecter.Content = "Iniciar sesión";
+                    TxtPasDeCompte.Text = "¿No tienes cuenta? ";
+                    LienInscription.Text = "Crear una cuenta";
+                    break;
+
+                default: // "en"
+                    TxtTitre.Text = "Sign In";
+                    TxtSousTitre.Text = "Welcome back 👋";
+                    TxtLabelUsername.Text = "Username";
+                    TxtLabelPassword.Text = "Password";
+                    BtnConnecter.Content = "Sign In";
+                    TxtPasDeCompte.Text = "Don't have an account? ";
+                    LienInscription.Text = "Create account";
+                    break;
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  CONNEXION
+        // ════════════════════════════════════════════════════════════
         private void BtnConnecter_Click(object sender, RoutedEventArgs e)
         {
             string username = UsernameBox.Text.Trim();
@@ -45,7 +118,11 @@ namespace YUMAPI.Views
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(motDePasse))
             {
-                ErreurLogin.Text = "Veuillez remplir tous les champs.";
+                ErreurLogin.Text = TraductionService.LangueActuelle == "es"
+                    ? "Por favor, completa todos los campos."
+                    : TraductionService.LangueActuelle == "fr"
+                        ? "Veuillez remplir tous les champs."
+                        : "Please fill in all fields.";
                 ErreurLogin.Visibility = Visibility.Visible;
                 return;
             }
@@ -65,8 +142,7 @@ namespace YUMAPI.Views
             }
         }
 
-        // ── Clic "Créer un compte" ─────────────────────────────────────────
-        private void LienInscription_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void LienInscription_Click(object sender, MouseButtonEventArgs e)
         {
             if (AllerInscription != null)
                 AllerInscription();

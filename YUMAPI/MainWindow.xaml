@@ -10,7 +10,42 @@
         Background="#111111">
 
     <Grid>
+        <!-- Container principal : login ou recettes -->
         <Grid x:Name="ContainerPrincipal"/>
-    </Grid>
 
+        <!-- Bouton flottant chat (visible seulement quand connecté) -->
+        <Border x:Name="BoutonChat"
+                Width="56" Height="56"
+                CornerRadius="28"
+                Background="#FF6B35"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,30,30"
+                Cursor="Hand"
+                Visibility="Collapsed"
+                MouseDown="BoutonChat_Click">
+            <Border.Effect>
+                <DropShadowEffect Color="#FF6B35" BlurRadius="20" Opacity="0.5" ShadowDepth="0"/>
+            </Border.Effect>
+            <TextBlock Text="💬" FontSize="24"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- Panneau chat (s'ouvre par-dessus) -->
+        <Border x:Name="PanneauChat"
+                Width="420"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Stretch"
+                Visibility="Collapsed"
+                Background="#111111"
+                BorderBrush="#2A2A2A"
+                BorderThickness="1,0,0,0">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" Opacity="0.4" ShadowDepth="0" Direction="180"/>
+            </Border.Effect>
+            <!-- ChatView sera injecté ici -->
+            <Grid x:Name="ContainerChat"/>
+        </Border>
+    </Grid>
 </Window>

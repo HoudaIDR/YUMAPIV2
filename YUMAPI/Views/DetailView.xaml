@@ -3,17 +3,28 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:YUMAPI.Controllers"
              mc:Ignorable="d"
              d:DesignHeight="900" d:DesignWidth="940"
              Background="#111111">
 
+    <UserControl.Resources>
+        <Storyboard x:Key="SpinAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="SpinnerRotation"
+                             Storyboard.TargetProperty="Angle"
+                             From="0" To="360" Duration="0:0:1"/>
+        </Storyboard>
+        <Storyboard x:Key="PulseAnimation" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetName="LoadingText"
+                             Storyboard.TargetProperty="Opacity"
+                             From="0.4" To="1.0" Duration="0:0:0.8"/>
+        </Storyboard>
+    </UserControl.Resources>
+
     <Grid>
 
-        <!-- Message d'accueil -->
+        <!-- ÉCRAN D'ACCUEIL -->
         <StackPanel x:Name="PanneauAccueil"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
                     Visibility="Visible">
             <TextBlock Text="🍽️" FontSize="72"
                        HorizontalAlignment="Center" Margin="0,0,0,20"/>
@@ -25,9 +36,58 @@
                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
         </StackPanel>
 
-        <!-- Détail recette -->
-        <ScrollViewer x:Name="PanneauDetail"
-                      Visibility="Collapsed"
+        <!-- ANIMATION CHARGEMENT -->
+        <Grid x:Name="PanneauChargement" Visibility="Collapsed"
+              HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center">
+                <Grid Width="100" Height="100"
+                      HorizontalAlignment="Center" Margin="0,0,0,30">
+                    <Ellipse Width="90" Height="90" Stroke="#222222" StrokeThickness="6"/>
+                    <Canvas Width="90" Height="90">
+                        <Canvas.RenderTransform>
+                            <RotateTransform x:Name="SpinnerRotation" CenterX="45" CenterY="45"/>
+                        </Canvas.RenderTransform>
+                        <Path Stroke="#FF6B35" StrokeThickness="6">
+                            <Path.Data>
+                                <PathGeometry>
+                                    <PathFigure StartPoint="45,3">
+                                        <ArcSegment Point="87,45" Size="42,42"
+                                                    SweepDirection="Clockwise" IsLargeArc="False"/>
+                                    </PathFigure>
+                                </PathGeometry>
+                            </Path.Data>
+                        </Path>
+                    </Canvas>
+                    <TextBlock x:Name="LoadingEmoji" Text="🍽️" FontSize="32"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+                <TextBlock x:Name="LoadingText" Text="Chargement..."
+                           Foreground="#FF6B35" FontSize="18" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                <TextBlock x:Name="LoadingSubText" Text="Récupération de la recette"
+                           Foreground="#555555" FontSize="13" HorizontalAlignment="Center"/>
+                <Border Width="260" Height="4" CornerRadius="2"
+                        Background="#222222" Margin="0,24,0,0">
+                    <Border x:Name="BarreProgression" Height="4" CornerRadius="2"
+                            Background="#FF6B35" HorizontalAlignment="Left" Width="0">
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Border.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BarreProgression"
+                                                         Storyboard.TargetProperty="Width"
+                                                         From="0" To="260" Duration="0:0:3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- DÉTAIL RECETTE -->
+        <ScrollViewer x:Name="PanneauDetail" Visibility="Collapsed"
                       VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.RowDefinitions>
@@ -37,86 +97,202 @@
 
                 <!-- IMAGE HERO -->
                 <Grid Grid.Row="0">
-                    <Image x:Name="DetailImage" Stretch="UniformToFill"/>
-
-<Border Background="#33000000"/>
-                    
-
+                    <Image x:Name="DetailImage" Stretch="UniformToFill" Opacity="0.7"/>
+                    <Border Background="#55000000"/>
                     <Grid VerticalAlignment="Bottom" Margin="40,0,40,30">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-
-                        <!-- Tags + bouton ❤ -->
                         <StackPanel Grid.Row="0" Orientation="Horizontal"
                                     Margin="0,0,0,12" VerticalAlignment="Center">
-
-                            <Border x:Name="TagCategorieBorder" Background="#FF6B35" CornerRadius="20" Padding="14,6" VerticalAlignment="Center">
+                            <Border x:Name="TagCategorieBorder"
+                                    Background="#FF6B35" CornerRadius="20" Padding="14,6">
                                 <TextBlock x:Name="TagCategorie"
-               Foreground="White" FontSize="11" FontWeight="Bold"
-               VerticalAlignment="Center"
-               HorizontalAlignment="Center"
-               TextAlignment="Center"/>
+                                           Foreground="White" FontSize="11" FontWeight="Bold"/>
                             </Border>
-
                             <Border Background="#333333" CornerRadius="20"
-        Padding="14,6" Margin="8,0,0,0"
-        VerticalAlignment="Center">
+                                    Padding="14,6" Margin="8,0,0,0">
                                 <TextBlock x:Name="TagPays"
-               Foreground="White" FontSize="11" FontWeight="Bold"
-               VerticalAlignment="Center"
-               HorizontalAlignment="Center"
-               TextAlignment="Center"/>
+                                           Foreground="White" FontSize="11" FontWeight="Bold"/>
                             </Border>
-
-                            <!-- Bouton ❤ rond orange -->
+                            <Border x:Name="BadgeCalories" Background="#222222"
+                                    CornerRadius="20" Padding="14,6" Margin="8,0,0,0"
+                                    BorderBrush="#FF6B35" BorderThickness="1"
+                                    Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🔥 " Foreground="White" FontSize="11"/>
+                                    <TextBlock x:Name="TxtCalories"
+                                               Foreground="White" FontSize="11" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
                             <Border x:Name="BoutonFavoriDetail"
                                     Background="#FF6B35" Width="36" Height="36"
                                     CornerRadius="18" Margin="12,0,0,0"
-                                    Cursor="Hand"
-                                    MouseDown="BtnFavoriDetail_Click">
-                                <TextBlock x:Name="CoeurDetail"
-                                           Text="🤍" FontSize="16"
+                                    Cursor="Hand" MouseDown="BtnFavoriDetail_Click">
+                                <TextBlock x:Name="CoeurDetail" Text="🤍" FontSize="16"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            IsHitTestVisible="False"/>
                             </Border>
                         </StackPanel>
-
-                        <!-- Titre -->
-                        <TextBlock x:Name="DetailTitre"
-                                   Grid.Row="1"
-                                   Foreground="White" FontSize="48"
-                                   FontWeight="Black" TextWrapping="Wrap"
-                                   Margin="0,0,0,16"/>
+                        <TextBlock x:Name="DetailTitre" Grid.Row="1"
+                                   Foreground="White" FontSize="42" FontWeight="Black"
+                                   TextWrapping="Wrap" Margin="0,0,0,16"/>
                     </Grid>
                 </Grid>
 
-                <!-- CORPS : ingrédients + instructions -->
+                <!-- CORPS -->
                 <Grid Grid.Row="1" Margin="40,30,40,40">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
                         <ColumnDefinition Width="1.5*"/>
                     </Grid.ColumnDefinitions>
 
+                    <!-- INGRÉDIENTS + PORTIONS -->
                     <StackPanel Grid.Column="0" Margin="0,0,30,0">
-                        <TextBlock Text="Ingredients"
-                                   Foreground="White" FontSize="26"
-                                   FontWeight="Bold" Margin="0,0,0,20"/>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" x:Name="TxtTitreIngredients"
+                                       Text="Ingrédients" Foreground="White"
+                                       FontSize="22" FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+                            <Border Grid.Column="1" Background="#1E1E1E" CornerRadius="20"
+                                    BorderBrush="#333333" BorderThickness="1" Padding="4,2">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border x:Name="BtnMoins" Width="28" Height="28"
+                                            CornerRadius="14" Background="#2A2A2A"
+                                            Cursor="Hand" MouseDown="BtnMoins_Click">
+                                        <TextBlock Text="−" Foreground="White" FontSize="16"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center" Margin="8,0">
+                                        <TextBlock x:Name="TxtPortions" Text="4"
+                                                   Foreground="White" FontSize="15"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="pers." Foreground="#666666"
+                                                   FontSize="9" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Border x:Name="BtnPlus" Width="28" Height="28"
+                                            CornerRadius="14" Background="#FF6B35"
+                                            Cursor="Hand" MouseDown="BtnPlus_Click">
+                                        <TextBlock Text="+" Foreground="White" FontSize="16"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                         <StackPanel x:Name="PanneauIngredients"/>
                     </StackPanel>
 
+                    <!-- PRÉPARATION + MODE GUIDÉ -->
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Preparation Steps"
-                                   Foreground="White" FontSize="26"
-                                   FontWeight="Bold" Margin="0,0,0,20"/>
-                        <Border Background="#1A1A1A" CornerRadius="16" Padding="25"
+
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" x:Name="TxtTitreInstructions"
+                                       Text="Préparation" Foreground="White"
+                                       FontSize="22" FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+                            <Border Grid.Column="1" x:Name="BoutonDemarrer"
+                                    Background="#FF6B35" CornerRadius="20"
+                                    Padding="16,8" Cursor="Hand"
+                                    MouseDown="BtnDemarrerRecette_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="▶  " Foreground="White"
+                                               FontSize="12" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Démarrer la recette" Foreground="White"
+                                               FontSize="12" FontWeight="Bold"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- Instructions normales -->
+                        <Border x:Name="PanneauInstructionsNormal"
+                                Background="#1A1A1A" CornerRadius="16" Padding="25"
                                 BorderBrush="#2A2A2A" BorderThickness="1">
                             <TextBlock x:Name="DetailInstructions"
                                        Foreground="#CCCCCC" FontSize="14"
                                        LineHeight="26" TextWrapping="Wrap"/>
                         </Border>
+
+                        <!-- MODE GUIDÉ -->
+                        <Border x:Name="PanneauGuide" Background="#1A1A1A"
+                                CornerRadius="16" BorderBrush="#FF6B35"
+                                BorderThickness="1" Visibility="Collapsed">
+                            <StackPanel Margin="25">
+
+                                <Grid Margin="0,0,0,20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#222222"
+                                            CornerRadius="4" Height="6"
+                                            VerticalAlignment="Center">
+                                        <Border x:Name="BarreEtapes" Background="#FF6B35"
+                                                CornerRadius="4" HorizontalAlignment="Left"
+                                                Width="0"/>
+                                    </Border>
+                                    <TextBlock x:Name="TxtNumeroEtape" Grid.Column="1"
+                                               Text="Étape 1/1" Foreground="#FF6B35"
+                                               FontSize="12" FontWeight="Bold"
+                                               Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <Border Background="#222222" CornerRadius="12"
+                                        Padding="20" Margin="0,0,0,20">
+                                    <TextBlock x:Name="TxtEtapeActuelle"
+                                               Foreground="White" FontSize="15"
+                                               LineHeight="28" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#222222"
+                                            CornerRadius="12" Padding="12,10"
+                                            Cursor="Hand" Margin="0,0,6,0"
+                                            MouseDown="BtnQuitterGuide_Click">
+                                        <TextBlock Text="✕  Quitter" Foreground="#999999"
+                                                   FontSize="13" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border x:Name="BtnPrecedent" Grid.Column="1"
+                                            Background="#222222" CornerRadius="12"
+                                            Padding="12,10" Cursor="Hand" Margin="0,0,6,0"
+                                            MouseDown="BtnPrecedentEtape_Click">
+                                        <TextBlock Text="◀  Précédent" Foreground="White"
+                                                   FontSize="13" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border x:Name="BtnSuivant" Grid.Column="2"
+                                            Background="#FF6B35" CornerRadius="12"
+                                            Padding="12,10" Cursor="Hand"
+                                            MouseDown="BtnSuivantEtape_Click">
+                                        <TextBlock x:Name="TxtBtnSuivant" Text="Suivant  ▶"
+                                                   Foreground="White" FontSize="13"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+
+                            </StackPanel>
+                        </Border>
+
                     </StackPanel>
                 </Grid>
             </Grid>
