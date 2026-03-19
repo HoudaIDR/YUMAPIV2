@@ -28,10 +28,12 @@
                     Visibility="Visible">
             <TextBlock Text="🍽️" FontSize="72"
                        HorizontalAlignment="Center" Margin="0,0,0,20"/>
-            <TextBlock Text="Sélectionnez une recette"
+            <TextBlock x:Name="TxtAccueilTitre"
+                       Text="Sélectionnez une recette"
                        Foreground="#555555" FontSize="22" FontWeight="SemiBold"
                        HorizontalAlignment="Center"/>
-            <TextBlock Text="ou recherchez un plat dans la liste"
+            <TextBlock x:Name="TxtAccueilSous"
+                       Text="ou recherchez un plat dans la liste"
                        Foreground="#444444" FontSize="14"
                        HorizontalAlignment="Center" Margin="0,8,0,0"/>
         </StackPanel>

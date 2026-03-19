@@ -13,4 +13,10 @@
     <PackageReference Include="System.Speech" Version="10.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Tokenignore\token.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

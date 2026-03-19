@@ -32,6 +32,17 @@ namespace YUMAPI.Views
             InitializeComponent();
             _spinStory = (Storyboard)Resources["SpinAnimation"];
             _pulseStory = (Storyboard)Resources["PulseAnimation"];
+
+            Loaded += (s, e) =>
+            {
+                string l = TraductionService.LangueActuelle;
+                TxtAccueilTitre.Text = l == "en" ? "Select a recipe"
+                                     : l == "es" ? "Selecciona una receta"
+                                     : "Sélectionnez une recette";
+                TxtAccueilSous.Text = l == "en" ? "or search for a dish in the list"
+                                     : l == "es" ? "o busca un plato en la lista"
+                                     : "ou recherchez un plat dans la liste";
+            };
         }
 
         public async void ChargerDetail(string id)
@@ -143,15 +154,60 @@ namespace YUMAPI.Views
         private void AjouterCarteIngredient(string mesure, string ingredient)
         {
             if (string.IsNullOrWhiteSpace(ingredient)) return;
-            Border carte = new Border { Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E")), CornerRadius = new CornerRadius(10), Padding = new Thickness(12, 10, 12, 10), Margin = new Thickness(0, 0, 0, 8), BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A")), BorderThickness = new Thickness(1) };
+
+            Border carte = new Border
+            {
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E")),
+                CornerRadius = new CornerRadius(10),
+                Padding = new Thickness(12, 10, 12, 10),
+                Margin = new Thickness(0, 0, 0, 8),
+                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A2A2A")),
+                BorderThickness = new Thickness(1)
+            };
+
             Grid g = new Grid();
-            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(44) });
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            Border badge = new Border { Background = ThemeManager.CouleurAccent, CornerRadius = new CornerRadius(22), Width = 44, Height = 44 };
-            badge.Child = new TextBlock { Text = string.IsNullOrWhiteSpace(mesure) ? "—" : mesure.Trim(), Foreground = Brushes.White, FontSize = 11, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, TextAlignment = TextAlignment.Center, TextWrapping = TextWrapping.Wrap };
-            Grid.SetColumn(badge, 0); g.Children.Add(badge);
-            TextBlock txI = new TextBlock { Text = ingredient.Trim(), Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")), FontSize = 14, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0, 0, 0), TextWrapping = TextWrapping.Wrap };
-            Grid.SetColumn(txI, 1); g.Children.Add(txI);
+
+            // Badge rectangulaire orange
+            Border badge = new Border
+            {
+                Background = ThemeManager.CouleurAccent,
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(14, 8, 14, 8),
+                MinWidth = 70,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            badge.Child = new TextBlock
+            {
+                Text = string.IsNullOrWhiteSpace(mesure) ? "—" : mesure.Trim(),
+                Foreground = Brushes.White,
+                FontSize = 12,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.NoWrap
+            };
+
+            Grid.SetColumn(badge, 0);
+            g.Children.Add(badge);
+
+            TextBlock txI = new TextBlock
+            {
+                Text = ingredient.Trim(),
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")),
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(14, 0, 0, 0),
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            Grid.SetColumn(txI, 1);
+            g.Children.Add(txI);
+
             carte.Child = g;
             PanneauIngredients.Children.Add(carte);
         }

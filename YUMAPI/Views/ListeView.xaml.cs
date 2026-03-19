@@ -76,6 +76,9 @@ namespace YUMAPI.Views
                     TxtAvatar.Text = u.Length > 0 ? u[0].ToString().ToUpper() : "?";
                 }
 
+                // Synchroniser toute l'interface avec la langue choisie au login
+                AppliquerLangue();
+
                 await ChargerRecettes("chicken");
                 _ = ChargerBaseCompleteAsync();
             };
@@ -90,6 +93,41 @@ namespace YUMAPI.Views
             if (_traductions.ContainsKey(cle))
                 return _traductions[cle];
             return motCle; // Pas de traduction trouvée → garder tel quel
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  TRADUCTION DE L'INTERFACE
+        // ════════════════════════════════════════════════════════════
+        private void AppliquerLangue()
+        {
+            string l = TraductionService.LangueActuelle;
+
+            // Membre
+            TxtMembre.Text = l == "en" ? "Member" : l == "es" ? "Miembro" : "Membre";
+
+            // Titre section
+            TxtSectionTitle.Text = l == "en" ? "FEATURED COLLECTION"
+                                 : l == "es" ? "COLECCIÓN DESTACADA"
+                                 : "COLLECTION VEDETTE";
+
+            // Boutons langue — actif = orange, inactif = transparent
+            SolidColorBrush orange = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+            SolidColorBrush transparent = new SolidColorBrush(Colors.Transparent);
+            SolidColorBrush blanc = new SolidColorBrush(Colors.White);
+            SolidColorBrush gris = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888"));
+
+            BtnLangEN.Background = l == "en" ? orange : transparent;
+            BtnLangFR.Background = l == "fr" ? orange : transparent;
+            BtnLangES.Background = l == "es" ? orange : transparent;
+
+            TxtLangEN.Foreground = l == "en" ? blanc : gris;
+            TxtLangFR.Foreground = l == "fr" ? blanc : gris;
+            TxtLangES.Foreground = l == "es" ? blanc : gris;
+
+            // Bouton toutes les recettes
+            TxtToutesRecettes.Text = l == "en" ? "All recipes"
+                                   : l == "es" ? "Todas las recetas"
+                                   : "Toutes les recettes";
         }
 
         // ════════════════════════════════════════════════════════════
@@ -177,7 +215,10 @@ namespace YUMAPI.Views
 
             if (string.IsNullOrEmpty(motCle))
             {
-                TxtSectionTitle.Text = "FEATURED COLLECTION";
+                string l = TraductionService.LangueActuelle;
+                TxtSectionTitle.Text = l == "en" ? "FEATURED COLLECTION"
+                                               : l == "es" ? "COLECCIÓN DESTACADA"
+                                               : "COLLECTION VEDETTE";
                 PanneauAutoComplete.Visibility = Visibility.Collapsed;
                 return;
             }
@@ -380,7 +421,7 @@ namespace YUMAPI.Views
         // ════════════════════════════════════════════════════════════
         //  TOUTES LES RECETTES (instantané si base déjà chargée)
         // ════════════════════════════════════════════════════════════
-        private async void BtnToutesLesRecettes_Click(object sender, RoutedEventArgs e)
+        private async void BtnToutesLesRecettes_Click(object sender, MouseButtonEventArgs e)
         {
             if (_baseChargee && _toutesLesRecettes.Any())
             {
@@ -406,11 +447,22 @@ namespace YUMAPI.Views
         // ════════════════════════════════════════════════════════════
         //  LANGUE
         // ════════════════════════════════════════════════════════════
-        private void LanguageSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void BtnLangEN_Click(object sender, MouseButtonEventArgs e)
         {
-            ComboBoxItem item = LanguageSelector.SelectedItem as ComboBoxItem;
-            if (item == null) return;
-            TraductionService.LangueActuelle = item.Tag?.ToString() ?? "en";
+            TraductionService.LangueActuelle = "en";
+            AppliquerLangue();
+        }
+
+        private void BtnLangFR_Click(object sender, MouseButtonEventArgs e)
+        {
+            TraductionService.LangueActuelle = "fr";
+            AppliquerLangue();
+        }
+
+        private void BtnLangES_Click(object sender, MouseButtonEventArgs e)
+        {
+            TraductionService.LangueActuelle = "es";
+            AppliquerLangue();
         }
 
         // ════════════════════════════════════════════════════════════
@@ -426,7 +478,6 @@ namespace YUMAPI.Views
         private void BtnDeconnecter_Click(object sender, MouseButtonEventArgs e)
         {
             UserController.SeDeconnecter();
-            TraductionService.LangueActuelle = "en";
             if (Deconnexion != null) Deconnexion();
         }
 

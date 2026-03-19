@@ -84,6 +84,7 @@ namespace YUMAPI.Views
                     BtnConnecter.Content = "Se connecter";
                     TxtPasDeCompte.Text = "Pas encore de compte ? ";
                     LienInscription.Text = "Créer un compte";
+                    TxtSousTitreGauche.Text = "Découvrez des milliers de recettes";
                     break;
 
                 case "es":
@@ -94,6 +95,7 @@ namespace YUMAPI.Views
                     BtnConnecter.Content = "Iniciar sesión";
                     TxtPasDeCompte.Text = "¿No tienes cuenta? ";
                     LienInscription.Text = "Crear una cuenta";
+                    TxtSousTitreGauche.Text = "Descubre miles de recetas";
                     break;
 
                 default: // "en"
@@ -104,6 +106,7 @@ namespace YUMAPI.Views
                     BtnConnecter.Content = "Sign In";
                     TxtPasDeCompte.Text = "Don't have an account? ";
                     LienInscription.Text = "Create account";
+                    TxtSousTitreGauche.Text = "Discover thousands of recipes";
                     break;
             }
         }

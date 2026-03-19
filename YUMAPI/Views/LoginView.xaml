@@ -25,7 +25,8 @@
                     <TextBlock Text="GOURMET STUDIO" Foreground="#FF6B35"
                                FontSize="16" FontWeight="SemiBold"
                                HorizontalAlignment="Center" Margin="0,10,0,0"/>
-                    <TextBlock Text="Découvrez des milliers de recettes"
+                    <TextBlock x:Name="TxtSousTitreGauche"
+                               Text="Découvrez des milliers de recettes"
                                Foreground="#666666" FontSize="14"
                                HorizontalAlignment="Center" Margin="0,20,0,0"/>
 

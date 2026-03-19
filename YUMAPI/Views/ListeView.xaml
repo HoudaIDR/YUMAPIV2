@@ -56,7 +56,6 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Barre de recherche -->
                 <Border Grid.Row="0" Background="#242424" CornerRadius="12"
                         BorderBrush="#333333" BorderThickness="1">
                     <Grid>
@@ -95,7 +94,6 @@
                     </Grid>
                 </Border>
 
-                <!-- LISTE AUTOCOMPLÉTION (par-dessus tout) -->
                 <Border Grid.Row="1"
                         x:Name="PanneauAutoComplete"
                         Background="#1E1E1E"
@@ -138,58 +136,79 @@
 
             <!-- BOUTON TOUTES LES RECETTES -->
             <Border Grid.Row="2" Margin="20,0,20,16"
+                    x:Name="BtnToutesLesRecettes"
                     Background="#242424" CornerRadius="12"
-                    BorderBrush="#333333" BorderThickness="1">
-                <Button x:Name="BtnToutesLesRecettes"
-                        Background="Transparent" Foreground="White"
-                        BorderThickness="0" FontSize="13" FontWeight="SemiBold"
-                        Padding="14,12" HorizontalContentAlignment="Left"
-                        Click="BtnToutesLesRecettes_Click">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}"
-                                    CornerRadius="12" Padding="{TemplateBinding Padding}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="🍽️"
-                                               FontSize="15" VerticalAlignment="Center"
-                                               Margin="0,0,10,0"/>
-                                    <TextBlock Grid.Column="1" Text="Toutes les recettes"
-                                               Foreground="White" FontSize="13"
-                                               FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                    <Border Grid.Column="2" Background="#FF6B35"
-                                            CornerRadius="8" Padding="8,4">
-                                        <TextBlock Text="ALL" Foreground="White"
-                                                   FontSize="10" FontWeight="Bold"/>
-                                    </Border>
-                                </Grid>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#2E2E2E"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+                    BorderBrush="#333333" BorderThickness="1"
+                    Cursor="Hand" MouseDown="BtnToutesLesRecettes_Click">
+                <Grid Margin="14,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="🍽️"
+                               FontSize="15" VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+                    <TextBlock x:Name="TxtToutesRecettes" Grid.Column="1"
+                               Text="All recipes"
+                               Foreground="White" FontSize="13"
+                               FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Border Grid.Column="2" Background="#FF6B35"
+                            CornerRadius="8" Padding="8,4">
+                        <TextBlock Text="ALL" Foreground="White"
+                                   FontSize="10" FontWeight="Bold"/>
+                    </Border>
+                </Grid>
             </Border>
 
             <!-- SÉLECTEUR DE LANGUE -->
             <Border Grid.Row="3" Margin="20,0,20,20"
-                    Background="#242424" CornerRadius="10"
-                    BorderBrush="#333333" BorderThickness="1">
-                <ComboBox x:Name="LanguageSelector"
-                          Background="Transparent" Foreground="Black"
-                          BorderThickness="0" FontSize="13" Padding="12,10"
-                          SelectionChanged="LanguageSelector_SelectionChanged">
-                    <ComboBoxItem Content="🇺🇸  English (US)" Tag="en" IsSelected="True"/>
-                    <ComboBoxItem Content="🇫🇷  Français"     Tag="fr"/>
-                    <ComboBoxItem Content="🇪🇸  Español"      Tag="es"/>
-                </ComboBox>
+                    Background="#1E1E1E" CornerRadius="12"
+                    BorderBrush="#2A2A2A" BorderThickness="1"
+                    Padding="4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border x:Name="BtnLangEN" Grid.Column="0"
+                            Background="#FF6B35" CornerRadius="8"
+                            Padding="0,8" Cursor="Hand"
+                            MouseDown="BtnLangEN_Click">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="🇺🇸 " FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtLangEN" Text="English"
+                                       Foreground="White" FontSize="12"
+                                       FontWeight="Bold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border x:Name="BtnLangFR" Grid.Column="1"
+                            Background="Transparent" CornerRadius="8"
+                            Padding="0,8" Cursor="Hand"
+                            MouseDown="BtnLangFR_Click">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="🇫🇷 " FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtLangFR" Text="Français"
+                                       Foreground="#888888" FontSize="12"
+                                       FontWeight="Bold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border x:Name="BtnLangES" Grid.Column="2"
+                            Background="Transparent" CornerRadius="8"
+                            Padding="0,8" Cursor="Hand"
+                            MouseDown="BtnLangES_Click">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="🇪🇸 " FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtLangES" Text="Español"
+                                       Foreground="#888888" FontSize="12"
+                                       FontWeight="Bold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Border>
 
             <!-- TITRE SECTION -->
@@ -272,7 +291,7 @@
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
                         <TextBlock x:Name="TxtUsername" Text="Utilisateur"
                                    Foreground="White" FontSize="13" FontWeight="SemiBold"/>
-                        <TextBlock Text="Membre" Foreground="#666666" FontSize="10"/>
+                        <TextBlock x:Name="TxtMembre" Text="Membre" Foreground="#666666" FontSize="10"/>
                     </StackPanel>
 
                     <Border Grid.Column="2" Background="#222222"

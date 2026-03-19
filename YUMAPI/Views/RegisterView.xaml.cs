@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ============================================================
+//  Views/RegisterView.xaml.cs
+//  + Traduction automatique selon la langue choisie au login
+// ============================================================
+
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using YUMAPI.Controllers;
 using YUMAPI.Models;
 
 namespace YUMAPI.Views
@@ -27,60 +23,115 @@ namespace YUMAPI.Views
         public RegisterView()
         {
             InitializeComponent();
+            Loaded += (s, e) => AppliquerLangue();
         }
 
-        // ── Vide les champs (appelé à chaque affichage) ───────────────────
+        // ── Vide les champs ───────────────────────────────────────────────
         public void Vider()
         {
             UsernameBox.Text = "";
             PasswordBox.Password = "";
             ConfirmPasswordBox.Password = "";
             MessageRetour.Visibility = Visibility.Collapsed;
+            AppliquerLangue();
         }
 
-        // ── Clic "Créer mon compte" ────────────────────────────────────────
+        // ── Traduction de l'interface ─────────────────────────────────────
+        private void AppliquerLangue()
+        {
+            string langue = TraductionService.LangueActuelle;
+
+            switch (langue)
+            {
+                case "es":
+                    TxtTitre.Text = "Crear una cuenta";
+                    TxtSousTitre.Text = "¡Únete a la comunidad Yum! 🎉";
+                    TxtSousTitreGauche.Text = "Descubre miles de recetas";
+                    TxtLabelUsername.Text = "Nombre de usuario";
+                    TxtLabelPassword.Text = "Contraseña";
+                    TxtLabelConfirm.Text = "Confirmar contraseña";
+                    BtnInscrire.Content = "Crear mi cuenta";
+                    TxtDejaCompte.Text = "¿Ya tienes cuenta? ";
+                    LienConnexion.Text = "Iniciar sesión";
+                    break;
+
+                case "en":
+                    TxtTitre.Text = "Create an account";
+                    TxtSousTitre.Text = "Join the Yum! community 🎉";
+                    TxtSousTitreGauche.Text = "Discover thousands of recipes";
+                    TxtLabelUsername.Text = "Username";
+                    TxtLabelPassword.Text = "Password";
+                    TxtLabelConfirm.Text = "Confirm password";
+                    BtnInscrire.Content = "Create my account";
+                    TxtDejaCompte.Text = "Already have an account? ";
+                    LienConnexion.Text = "Sign in";
+                    break;
+
+                default: // "fr"
+                    TxtTitre.Text = "Créer un compte";
+                    TxtSousTitre.Text = "Rejoignez la communauté Yum! 🎉";
+                    TxtSousTitreGauche.Text = "Découvrez des milliers de recettes";
+                    TxtLabelUsername.Text = "Nom d'utilisateur";
+                    TxtLabelPassword.Text = "Mot de passe";
+                    TxtLabelConfirm.Text = "Confirmer le mot de passe";
+                    BtnInscrire.Content = "Créer mon compte";
+                    TxtDejaCompte.Text = "Déjà un compte ? ";
+                    LienConnexion.Text = "Se connecter";
+                    break;
+            }
+        }
+
+        // ── Inscription ───────────────────────────────────────────────────
         private void BtnInscrire_Click(object sender, RoutedEventArgs e)
         {
+            string langue = TraductionService.LangueActuelle;
             string username = UsernameBox.Text.Trim();
             string motDePasse = PasswordBox.Password;
             string confirmation = ConfirmPasswordBox.Password;
 
-            // 1. Champs vides
+            // Champs vides
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(motDePasse) ||
                 string.IsNullOrEmpty(confirmation))
             {
-                AfficherErreur("Veuillez remplir tous les champs.");
+                AfficherErreur(langue == "es" ? "Por favor, completa todos los campos."
+                             : langue == "en" ? "Please fill in all fields."
+                             : "Veuillez remplir tous les champs.");
                 return;
             }
 
-            // 2. Pseudo trop court
+            // Pseudo trop court
             if (username.Length < 3)
             {
-                AfficherErreur("Le nom d'utilisateur doit contenir au moins 3 caractères.");
+                AfficherErreur(langue == "es" ? "El nombre debe tener al menos 3 caracteres."
+                             : langue == "en" ? "Username must be at least 3 characters."
+                             : "Le nom doit contenir au moins 3 caractères.");
                 return;
             }
 
-            // 3. Mot de passe trop court
+            // Mot de passe trop court
             if (motDePasse.Length < 8)
             {
-                AfficherErreur("Mot de passe trop court. Minimum 8 caractères requis.");
+                AfficherErreur(langue == "es" ? "La contraseña debe tener al menos 8 caracteres."
+                             : langue == "en" ? "Password must be at least 8 characters."
+                             : "Mot de passe trop court. Minimum 8 caractères.");
                 return;
             }
 
-            // 4. Confirmation
+            // Confirmation
             if (motDePasse != confirmation)
             {
-                AfficherErreur("Les mots de passe ne correspondent pas.");
+                AfficherErreur(langue == "es" ? "Las contraseñas no coinciden."
+                             : langue == "en" ? "Passwords do not match."
+                             : "Les mots de passe ne correspondent pas.");
                 return;
             }
 
-            // 5. Inscription
+            // Inscription
             bool succes = UserController.Inscrire(username, motDePasse);
 
             if (succes)
             {
                 UserController.SeConnecter(username, motDePasse);
-
                 if (InscriptionReussie != null)
                     InscriptionReussie(username);
             }
@@ -90,7 +141,6 @@ namespace YUMAPI.Views
             }
         }
 
-        // ── Affiche un message d'erreur en rouge ──────────────────────────
         private void AfficherErreur(string message)
         {
             MessageRetour.Text = message;
@@ -99,8 +149,7 @@ namespace YUMAPI.Views
             MessageRetour.Visibility = Visibility.Visible;
         }
 
-        // ── Clic "Se connecter" ────────────────────────────────────────────
-        private void LienConnexion_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void LienConnexion_Click(object sender, MouseButtonEventArgs e)
         {
             if (AllerConnexion != null)
                 AllerConnexion();
