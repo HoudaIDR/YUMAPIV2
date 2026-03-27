@@ -98,11 +98,11 @@ namespace YUMAPI.Views
             string nom = "Orange (par défaut)";
 
             if (hex == "#FF6B35") { AjouterEffet(CerclOrange, hex); nom = "Orange (par défaut)"; }
-            else if (hex == "#E91E8C") { AjouterEffet(CerclRose, hex); nom = "Rose"; }
-            else if (hex == "#E53935") { AjouterEffet(CerclRouge, hex); nom = "Rouge"; }
-            else if (hex == "#1E88E5") { AjouterEffet(CerclBleu, hex); nom = "Bleu"; }
-            else if (hex == "#43A047") { AjouterEffet(CerclVert, hex); nom = "Vert"; }
-            else if (hex == "#8E24AA") { AjouterEffet(CerclViolet, hex); nom = "Violet"; }
+            else if (hex == "#F48FB1") { AjouterEffet(CerclRose, hex); nom = "Rose"; }
+            else if (hex == "#C62828 ") { AjouterEffet(CerclRouge, hex); nom = "Rouge"; }
+            else if (hex == "#90CAF9") { AjouterEffet(CerclBleu, hex); nom = "Bleu"; }
+            else if (hex == "#A5D6A7 ") { AjouterEffet(CerclVert, hex); nom = "Vert"; }
+            else if (hex == "#6A1B9A ") { AjouterEffet(CerclViolet, hex); nom = "Violet"; }
 
             TxtCouleurActive.Text = "Couleur active : " + nom;
             TxtCouleurActive.Foreground = brosse;
