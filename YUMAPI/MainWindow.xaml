@@ -10,6 +10,7 @@
         Background="#111111">
 
     <Grid>
+
         <!-- Container principal : login ou recettes -->
         <Grid x:Name="ContainerPrincipal"/>
 
@@ -44,8 +45,13 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="20" Opacity="0.4" ShadowDepth="0" Direction="180"/>
             </Border.Effect>
-            <!-- ChatView sera injecté ici -->
             <Grid x:Name="ContainerChat"/>
         </Border>
+
+        <!-- Overlay bienvenue : affiché PAR-DESSUS tout après connexion -->
+        <!-- Caché par défaut, activé dans MainWindow.xaml.cs -->
+        <Grid x:Name="ContainerBienvenue"
+              Visibility="Collapsed"/>
+
     </Grid>
 </Window>

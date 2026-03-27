@@ -1,6 +1,6 @@
 ﻿// ============================================================
 //  MainWindow.xaml.cs
-//  Navigation + bouton chat flottant IA
+//  Navigation + bouton chat flottant + page bienvenue
 // ============================================================
 
 using System.Windows;
@@ -16,6 +16,7 @@ namespace YUMAPI
         private RegisterView registerView;
         private ListeView listeViewCourante;
         private ChatView chatView;
+        private DetailView detailViewCourante;
 
         public MainWindow()
         {
@@ -35,7 +36,6 @@ namespace YUMAPI
         // ── Afficher la page de connexion ─────────────────────────────────
         private void AfficherLogin()
         {
-            // Cacher le bouton chat et le panneau
             BoutonChat.Visibility = Visibility.Collapsed;
             PanneauChat.Visibility = Visibility.Collapsed;
 
@@ -52,16 +52,18 @@ namespace YUMAPI
             ContainerPrincipal.Children.Add(registerView);
         }
 
-        // ── Connexion réussie → afficher les recettes ─────────────────────
+        // ── Connexion réussie → construire la page recettes + bienvenue ───
         private void OnConnexionReussie(string username)
         {
             ContainerPrincipal.Children.Clear();
             PanneauChat.Visibility = Visibility.Collapsed;
 
+            // Créer les deux vues côte à côte
             ListeView listeView = new ListeView();
             DetailView detailView = new DetailView();
 
             listeViewCourante = listeView;
+            detailViewCourante = detailView;
 
             listeView.RecetteCliquee += (id) => detailView.ChargerDetail(id);
             listeView.Deconnexion += AfficherLogin;
@@ -78,7 +80,7 @@ namespace YUMAPI
 
             ContainerPrincipal.Children.Add(grille);
 
-            // Afficher le bouton chat flottant
+            // Afficher le bouton chat
             BoutonChat.Visibility = Visibility.Visible;
 
             // Préparer le ChatView
@@ -86,13 +88,55 @@ namespace YUMAPI
             chatView.Fermer += FermerChat;
             chatView.RechercheRecette += (motCle) =>
             {
-                // Quand l'IA suggère une recette → lancer la recherche dans ListeView
                 listeViewCourante?.LancerRecherche(motCle);
                 FermerChat();
             };
 
             ContainerChat.Children.Clear();
             ContainerChat.Children.Add(chatView);
+
+            // Afficher la page de bienvenue par-dessus tout
+            AfficherBienvenue(username);
+        }
+
+        // ── Créer et afficher la page de bienvenue ────────────────────────
+        private void AfficherBienvenue(string username)
+        {
+            BienvenueView bienvenueView = new BienvenueView();
+
+            // Quand l'utilisateur clique "Oui"
+            bienvenueView.OuiClique += (idPlat) =>
+            {
+                // 1. On ferme la bienvenue
+                FermerBienvenue();
+
+                // 2. On attend que l'interface soit prête puis on charge le plat
+                Dispatcher.InvokeAsync(() =>
+                {
+                    detailViewCourante.ChargerDetail(idPlat);
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
+            };
+
+            // Quand l'utilisateur clique "Non"
+            bienvenueView.NonClique += () =>
+            {
+                FermerBienvenue();
+            };
+
+            // Mettre la vue dans son conteneur et l'afficher
+            ContainerBienvenue.Children.Clear();
+            ContainerBienvenue.Children.Add(bienvenueView);
+            ContainerBienvenue.Visibility = Visibility.Visible;
+
+            // Lancer la recherche du plat aléatoire
+            bienvenueView.Initialiser(username);
+        }
+
+        // ── Masquer la page de bienvenue ─────────────────────────────────
+        private void FermerBienvenue()
+        {
+            ContainerBienvenue.Visibility = Visibility.Collapsed;
+            ContainerBienvenue.Children.Clear();
         }
 
         // ── Clic bouton chat flottant ─────────────────────────────────────
@@ -104,7 +148,6 @@ namespace YUMAPI
                 OuvrirChat();
         }
 
-        // ── Ouvrir le panneau chat ────────────────────────────────────────
         private void OuvrirChat()
         {
             PanneauChat.Visibility = Visibility.Visible;

@@ -4,6 +4,7 @@
 // ============================================================
 
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -15,9 +16,21 @@ namespace YUMAPI.Controllers
 {
     public static class TraductionService
     {
-        private const string TOKEN = "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";
+        private static string TOKEN => LireToken();
         private const string MODELE = "gpt-4o-mini";
         private const string API_URL = "https://models.inference.ai.azure.com/chat/completions";
+
+        private static string LireToken()
+        {
+            try
+            {
+                string chemin = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Tokenignore", "token.txt");
+                return File.ReadAllText(chemin).Trim();
+            }
+            catch { return ""; }
+        }
 
         private static HttpClient _client;
 
@@ -102,6 +115,50 @@ namespace YUMAPI.Controllers
             _client = new HttpClient();
             _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", TOKEN);
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  PROPOSITION D'UN PLAT À LA CONNEXION
+        // ════════════════════════════════════════════════════════════
+        public static async Task<string[]> ProposerUnPlat()
+        {
+            // Liste de lettres pour aller chercher des plats dans l'API
+            string[] lettres = { "a", "b", "c", "s", "p", "r", "t", "g", "m", "l" };
+
+            try
+            {
+                // Étape 1 : on choisit une lettre au hasard et on récupère les plats qui existent
+                Random random = new Random();
+                string lettre = lettres[random.Next(lettres.Length)];
+
+                string url = "https://www.themealdb.com/api/json/v1/1/search.php?f=" + lettre;
+                HttpResponseMessage rep = await _client.GetAsync(url);
+                string repJson = await rep.Content.ReadAsStringAsync();
+
+                using JsonDocument docApi = JsonDocument.Parse(repJson);
+                JsonElement meals = docApi.RootElement.GetProperty("meals");
+
+                // Si aucun plat trouvé pour cette lettre → on abandonne
+                if (meals.ValueKind == JsonValueKind.Null)
+                    return null;
+
+                // Étape 2 : on choisit un plat au hasard dans la liste retournée
+                int nbPlats = meals.GetArrayLength();
+                int index = random.Next(nbPlats);
+
+                string vraiNom = meals[index].GetProperty("strMeal").GetString();
+                string vraiId = meals[index].GetProperty("idMeal").GetString();
+
+                // Étape 3 : on choisit un emoji au hasard pour rendre ça sympa
+                string[] emojis = { "🍝", "🍜", "🍲", "🥘", "🍛", "🥗", "🍖", "🍗", "🥩", "🫕" };
+                string emoji = emojis[random.Next(emojis.Length)];
+
+                string phrase = "Aujourd'hui on pourrait cuisiner... " + vraiNom + " " + emoji;
+
+                // On retourne : [0] = texte affiché, [1] = id réel du plat
+                return new string[] { phrase, vraiId };
+            }
+            catch { return null; }
         }
 
         // ════════════════════════════════════════════════════════════
@@ -196,8 +253,7 @@ namespace YUMAPI.Controllers
 
                 texteIA = texteIA.Replace("```json", "").Replace("```", "").Trim();
                 using JsonDocument doc = JsonDocument.Parse(texteIA);
-                string val = doc.RootElement
-                    .GetProperty("par_personne").GetString();
+                string val = doc.RootElement.GetProperty("par_personne").GetString();
 
                 _cacheCalories[recette.idMeal] = val;
                 return val;
@@ -210,7 +266,6 @@ namespace YUMAPI.Controllers
         // ════════════════════════════════════════════════════════════
         public static async Task<string[]> AjusterPortions(MealDto recette, int nbPersonnes)
         {
-            // 4 personnes = valeurs originales, pas besoin d'appel IA
             if (nbPersonnes == 4)
             {
                 return new string[]
