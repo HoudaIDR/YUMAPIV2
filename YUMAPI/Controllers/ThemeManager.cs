@@ -1,19 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ============================================================
+//  Controllers/ThemeManager.cs
+//  Gère la couleur accent de l'application
+//  Quand on change la couleur, toutes les vues sont notifiées
+// ============================================================
+
+using System;
 using System.Windows.Media;
 
 namespace YUMAPI.Controllers
 {
-    // Classe statique = accessible partout sans créer d'objet
     public static class ThemeManager
     {
-        // On stocke juste le code couleur en texte
+        // Couleur par défaut : orange
         public static string CouleurHex = "#FF6B35";
 
-        // Propriété qui retourne une nouvelle brosse à chaque fois
+        // Événement déclenché quand la couleur change
+        // Toutes les vues peuvent s'y abonner pour se mettre à jour
+        public static event Action CouleurChangee;
+
+        // Propriété qui retourne une brosse de la couleur actuelle
         public static SolidColorBrush CouleurAccent
         {
             get
@@ -24,9 +29,14 @@ namespace YUMAPI.Controllers
             }
         }
 
+        // Changer la couleur et notifier tout le monde
         public static void ChangerCouleur(string hex)
         {
             CouleurHex = hex;
+
+            // Déclencher l'événement si quelqu'un est abonné
+            if (CouleurChangee != null)
+                CouleurChangee();
         }
     }
 }

@@ -14,7 +14,7 @@
         <!-- Container principal : login ou recettes -->
         <Grid x:Name="ContainerPrincipal"/>
 
-        <!-- Bouton flottant chat (visible seulement quand connecté) -->
+        <!-- Bouton flottant chat -->
         <Border x:Name="BoutonChat"
                 Width="56" Height="56"
                 CornerRadius="28"
@@ -33,7 +33,7 @@
                        VerticalAlignment="Center"/>
         </Border>
 
-        <!-- Panneau chat (s'ouvre par-dessus) -->
+        <!-- Panneau chat -->
         <Border x:Name="PanneauChat"
                 Width="420"
                 HorizontalAlignment="Right"
@@ -48,10 +48,11 @@
             <Grid x:Name="ContainerChat"/>
         </Border>
 
-        <!-- Overlay bienvenue : affiché PAR-DESSUS tout après connexion -->
-        <!-- Caché par défaut, activé dans MainWindow.xaml.cs -->
-        <Grid x:Name="ContainerBienvenue"
-              Visibility="Collapsed"/>
+        <!-- Overlay bienvenue (par-dessus tout après connexion) -->
+        <Grid x:Name="ContainerBienvenue" Visibility="Collapsed"/>
+
+        <!-- Overlay profil (par-dessus tout quand on clique sur l'avatar) -->
+        <Grid x:Name="ContainerProfil" Visibility="Collapsed"/>
 
     </Grid>
 </Window>

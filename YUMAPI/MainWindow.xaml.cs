@@ -1,11 +1,13 @@
 ﻿// ============================================================
 //  MainWindow.xaml.cs
-//  Navigation + bouton chat flottant + page bienvenue
+//  Navigation + chat flottant + bienvenue + profil
 // ============================================================
 
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using YUMAPI.Controllers;
+using YUMAPI.Models;
 using YUMAPI.Views;
 
 namespace YUMAPI
@@ -52,13 +54,17 @@ namespace YUMAPI
             ContainerPrincipal.Children.Add(registerView);
         }
 
-        // ── Connexion réussie → construire la page recettes + bienvenue ───
+        // ── Connexion réussie ─────────────────────────────────────────────
         private void OnConnexionReussie(string username)
         {
             ContainerPrincipal.Children.Clear();
             PanneauChat.Visibility = Visibility.Collapsed;
 
-            // Créer les deux vues côte à côte
+            // Appliquer la couleur sauvegardée de l'utilisateur
+            if (UserController.UtilisateurConnecte != null)
+                ThemeManager.ChangerCouleur(UserController.UtilisateurConnecte.CouleurTheme ?? "#FF6B35");
+
+            // Créer les deux vues principales
             ListeView listeView = new ListeView();
             DetailView detailView = new DetailView();
 
@@ -67,6 +73,9 @@ namespace YUMAPI
 
             listeView.RecetteCliquee += (id) => detailView.ChargerDetail(id);
             listeView.Deconnexion += AfficherLogin;
+
+            // Ouvrir le profil quand on clique sur l'avatar dans ListeView
+            listeView.OuvrirProfil += AfficherProfil;
 
             Grid grille = new Grid();
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(360) });
@@ -80,10 +89,8 @@ namespace YUMAPI
 
             ContainerPrincipal.Children.Add(grille);
 
-            // Afficher le bouton chat
             BoutonChat.Visibility = Visibility.Visible;
 
-            // Préparer le ChatView
             chatView = new ChatView();
             chatView.Fermer += FermerChat;
             chatView.RechercheRecette += (motCle) =>
@@ -95,51 +102,60 @@ namespace YUMAPI
             ContainerChat.Children.Clear();
             ContainerChat.Children.Add(chatView);
 
-            // Afficher la page de bienvenue par-dessus tout
+            // Afficher la bienvenue
             AfficherBienvenue(username);
         }
 
-        // ── Créer et afficher la page de bienvenue ────────────────────────
+        // ── Page de bienvenue ─────────────────────────────────────────────
         private void AfficherBienvenue(string username)
         {
             BienvenueView bienvenueView = new BienvenueView();
 
-            // Quand l'utilisateur clique "Oui"
             bienvenueView.OuiClique += (idPlat) =>
             {
-                // 1. On ferme la bienvenue
                 FermerBienvenue();
-
-                // 2. On attend que l'interface soit prête puis on charge le plat
                 Dispatcher.InvokeAsync(() =>
                 {
                     detailViewCourante.ChargerDetail(idPlat);
                 }, System.Windows.Threading.DispatcherPriority.Loaded);
             };
 
-            // Quand l'utilisateur clique "Non"
-            bienvenueView.NonClique += () =>
-            {
-                FermerBienvenue();
-            };
+            bienvenueView.NonClique += () => FermerBienvenue();
 
-            // Mettre la vue dans son conteneur et l'afficher
             ContainerBienvenue.Children.Clear();
             ContainerBienvenue.Children.Add(bienvenueView);
             ContainerBienvenue.Visibility = Visibility.Visible;
 
-            // Lancer la recherche du plat aléatoire
             bienvenueView.Initialiser(username);
         }
 
-        // ── Masquer la page de bienvenue ─────────────────────────────────
         private void FermerBienvenue()
         {
             ContainerBienvenue.Visibility = Visibility.Collapsed;
             ContainerBienvenue.Children.Clear();
         }
 
-        // ── Clic bouton chat flottant ─────────────────────────────────────
+        // ── Page de profil ────────────────────────────────────────────────
+        private void AfficherProfil()
+        {
+            ProfilView profilView = new ProfilView();
+
+            profilView.Fermer += () => FermerProfil();
+
+            ContainerProfil.Children.Clear();
+            ContainerProfil.Children.Add(profilView);
+            ContainerProfil.Visibility = Visibility.Visible;
+
+            profilView.Initialiser();
+        }
+
+        private void FermerProfil()
+        {
+            ContainerProfil.Visibility = Visibility.Collapsed;
+            ContainerProfil.Children.Clear();
+        }
+
+        // ── Chat flottant ─────────────────────────────────────────────────
         private void BoutonChat_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (PanneauChat.Visibility == Visibility.Visible)
@@ -151,7 +167,6 @@ namespace YUMAPI
         private void OuvrirChat()
         {
             PanneauChat.Visibility = Visibility.Visible;
-
             BoutonChat.Child = new TextBlock
             {
                 Text = "✕",
@@ -166,7 +181,6 @@ namespace YUMAPI
         private void FermerChat()
         {
             PanneauChat.Visibility = Visibility.Collapsed;
-
             BoutonChat.Child = new TextBlock
             {
                 Text = "💬",

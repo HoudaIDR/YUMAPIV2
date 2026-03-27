@@ -42,6 +42,15 @@ namespace YUMAPI.Views
                 TxtAccueilSous.Text = l == "en" ? "or search for a dish in the list"
                                      : l == "es" ? "o busca un plato en la lista"
                                      : "ou recherchez un plat dans la liste";
+
+                // S'abonner au changement de couleur
+                ThemeManager.CouleurChangee += AppliquerCouleur;
+            };
+
+            // Se désabonner quand la vue est déchargée
+            Unloaded += (s, e) =>
+            {
+                ThemeManager.CouleurChangee -= AppliquerCouleur;
             };
         }
 
@@ -74,6 +83,9 @@ namespace YUMAPI.Views
 
             _recetteOriginale = recette;
             _recetteActuelle = new MealListItem { Id = recette.idMeal, Title = recette.strMeal, Thumb = recette.strMealThumb };
+
+            // Enregistrer la derniere recette consultee dans le profil
+            UserController.EnregistrerDerniereRecette(_recetteActuelle);
 
             if (traductionActive)
                 recette = await TraductionService.TraduireRecette(recette);
@@ -349,6 +361,22 @@ namespace YUMAPI.Views
             SolidColorBrush b = ThemeManager.CouleurAccent;
             TagCategorieBorder.Background = b;
             BoutonFavoriDetail.Background = b;
+            // Mettre a jour le spinner de chargement
+            try { SpinnerArc.Stroke = b; } catch { }
+            // Mettre a jour le texte de chargement
+            try { LoadingText.Foreground = b; } catch { }
+            // Mettre a jour la barre de progression
+            try { BarreProgression.Background = b; } catch { }
+            // Mettre a jour le badge calories
+            try { BadgeCalories.BorderBrush = b; } catch { }
+            // Mettre a jour la barre d etapes mode guide
+            try { BarreEtapes.Background = b; } catch { }
+            try { TxtNumeroEtape.Foreground = b; } catch { }
+            try { BtnSuivant.Background = b; } catch { }
+            // Mettre a jour le bouton demarrer
+            try { BoutonDemarrer.Background = b; } catch { }
+            // Mettre a jour le bouton +
+            try { BtnPlus.Background = b; } catch { }
         }
 
         private void BtnFavoriDetail_Click(object sender, MouseButtonEventArgs e)

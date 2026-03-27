@@ -49,7 +49,9 @@
                         <Canvas.RenderTransform>
                             <RotateTransform x:Name="SpinnerRotation" CenterX="45" CenterY="45"/>
                         </Canvas.RenderTransform>
-                        <Path Stroke="#FF6B35" StrokeThickness="6">
+                        <Path x:Name="SpinnerArc"
+      Stroke="#FF6B35"
+      StrokeThickness="6">
                             <Path.Data>
                                 <PathGeometry>
                                     <PathFigure StartPoint="45,3">

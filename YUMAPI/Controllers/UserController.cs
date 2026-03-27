@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ============================================================
+//  Controllers/UserController.cs
+// ============================================================
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -88,6 +92,8 @@ namespace YUMAPI.Models
             nouvelUser.Username = username;
             nouvelUser.Password = HasherMotDePasse(motDePasse);
             nouvelUser.Favoris = new List<MealListItem>();
+            nouvelUser.DateCreation = DateTime.Now; // On enregistre la date de création
+            nouvelUser.CouleurTheme = "#FF6B35";    // Couleur par défaut : orange
 
             utilisateurs.Add(nouvelUser);
 
@@ -132,6 +138,13 @@ namespace YUMAPI.Models
         {
             UtilisateurConnecte = null;
         }
+
+        // ── Enregistrer la dernière recette consultée ─────────────────────
+        public static void EnregistrerDerniereRecette(MealListItem recette)
+        {
+            if (UtilisateurConnecte == null) return;
+            UtilisateurConnecte.DerniereRecette = recette;
+            Sauvegarder();
+        }
     }
 }
-

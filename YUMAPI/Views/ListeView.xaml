@@ -26,7 +26,9 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0"
+                <!-- Logo rond - nom BordureLogo pour changer la couleur -->
+                <Border x:Name="BordureLogo"
+                        Grid.Column="0"
                         Background="#FF6B35" Width="48" Height="48"
                         CornerRadius="24" Margin="0,0,12,0">
                     <TextBlock Text="🍴" FontSize="22"
@@ -39,6 +41,7 @@
                     <TextBlock Text="GOURMET STUDIO" Foreground="#666666" FontSize="9" FontWeight="SemiBold"/>
                 </StackPanel>
 
+                <!-- Bouton favoris - nom BordureFavorisHaut pour changer la couleur -->
                 <Border Grid.Column="2"
                         x:Name="BordureFavorisHaut"
                         Background="#FF6B35" Width="36" Height="36"
@@ -79,6 +82,7 @@
                                  KeyDown="SearchBox_KeyDown"
                                  TextChanged="SearchBox_TextChanged"/>
 
+                        <!-- Bouton → nom BtnRechercher pour changer la couleur -->
                         <Button x:Name="BtnRechercher"
                                 Grid.Column="2"
                                 Content="→" Width="36" Height="36" Margin="4"
@@ -153,7 +157,8 @@
                                Text="All recipes"
                                Foreground="White" FontSize="13"
                                FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <Border Grid.Column="2" Background="#FF6B35"
+                    <!-- Badge ALL - nom BadgeAll pour changer la couleur -->
+                    <Border x:Name="BadgeAll" Grid.Column="2" Background="#FF6B35"
                             CornerRadius="8" Padding="8,4">
                         <TextBlock Text="ALL" Foreground="White"
                                    FontSize="10" FontWeight="Bold"/>
@@ -280,8 +285,13 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Background="#FF6B35"
-                            Width="38" Height="38" CornerRadius="19">
+                    <!-- Avatar CLIQUABLE pour ouvrir le profil -->
+                    <Border Grid.Column="0" x:Name="BordureAvatar"
+                            Background="#FF6B35"
+                            Width="38" Height="38" CornerRadius="19"
+                            Cursor="Hand"
+                            MouseDown="BtnAvatar_Click">
+                        <Border.ToolTip>Voir mon profil</Border.ToolTip>
                         <TextBlock x:Name="TxtAvatar" Text="?" Foreground="White"
                                    FontSize="16" FontWeight="Bold"
                                    HorizontalAlignment="Center"
