@@ -4,6 +4,7 @@
 // ============================================================
 
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -15,9 +16,21 @@ namespace YUMAPI.Controllers
 {
     public static class TraductionService
     {
-        private const string TOKEN = "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";
+        private static string TOKEN => LireToken();
         private const string MODELE = "gpt-4o-mini";
         private const string API_URL = "https://models.inference.ai.azure.com/chat/completions";
+
+        private static string LireToken()
+        {
+            try
+            {
+                string chemin = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Tokenignore", "token.txt");
+                return File.ReadAllText(chemin).Trim();
+            }
+            catch { return ""; }
+        }
 
         private static HttpClient _client;
 
@@ -26,6 +39,14 @@ namespace YUMAPI.Controllers
         private static Dictionary<string, string[]> _cachePortions = new Dictionary<string, string[]>();
 
         public static string LangueActuelle { get; set; } = "en";
+
+        // Vide le cache quand on change de langue
+        public static void ViderCache()
+        {
+            _cacheTraductions.Clear();
+            _cacheCalories.Clear();
+            _cachePortions.Clear();
+        }
 
         // ── Textes d'interface traduits ───────────────────────────────────
         public static string T(string cle)
@@ -155,22 +176,93 @@ namespace YUMAPI.Controllers
                     strIngredient8 = Get(root, "i8", recette.strIngredient8),
                     strIngredient9 = Get(root, "i9", recette.strIngredient9),
                     strIngredient10 = Get(root, "i10", recette.strIngredient10),
-                    strMeasure1 = recette.strMeasure1,
-                    strMeasure2 = recette.strMeasure2,
-                    strMeasure3 = recette.strMeasure3,
-                    strMeasure4 = recette.strMeasure4,
-                    strMeasure5 = recette.strMeasure5,
-                    strMeasure6 = recette.strMeasure6,
-                    strMeasure7 = recette.strMeasure7,
-                    strMeasure8 = recette.strMeasure8,
-                    strMeasure9 = recette.strMeasure9,
-                    strMeasure10 = recette.strMeasure10,
+                    strMeasure1 = TraduireMesurePublic(recette.strMeasure1),
+                    strMeasure2 = TraduireMesurePublic(recette.strMeasure2),
+                    strMeasure3 = TraduireMesurePublic(recette.strMeasure3),
+                    strMeasure4 = TraduireMesurePublic(recette.strMeasure4),
+                    strMeasure5 = TraduireMesurePublic(recette.strMeasure5),
+                    strMeasure6 = TraduireMesurePublic(recette.strMeasure6),
+                    strMeasure7 = TraduireMesurePublic(recette.strMeasure7),
+                    strMeasure8 = TraduireMesurePublic(recette.strMeasure8),
+                    strMeasure9 = TraduireMesurePublic(recette.strMeasure9),
+                    strMeasure10 = TraduireMesurePublic(recette.strMeasure10),
                 };
 
                 _cacheTraductions[cleCache] = traduite;
                 return traduite;
             }
             catch { return recette; }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  TRADUCTION DES MESURES
+        // ════════════════════════════════════════════════════════════
+        public static string TraduireMesurePublic(string mesure)
+        {
+            if (string.IsNullOrWhiteSpace(mesure)) return mesure;
+            if (LangueActuelle == "en") return mesure;
+
+            bool fr = LangueActuelle == "fr";
+
+            string m = mesure.Trim();
+
+            // Remplacements exacts
+            var dict = new System.Collections.Generic.Dictionary<string, (string fr, string es)>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "tablespoon",  ("cuillère à soupe", "cucharada") },
+                { "tablespoons", ("cuillères à soupe", "cucharadas") },
+                { "tbsp",        ("c. à soupe", "cda.") },
+                { "teaspoon",    ("cuillère à café", "cucharadita") },
+                { "teaspoons",   ("cuillères à café", "cucharaditas") },
+                { "tsp",         ("c. à café", "cdita.") },
+                { "cup",         ("tasse", "taza") },
+                { "cups",        ("tasses", "tazas") },
+                { "pound",       ("livre", "libra") },
+                { "pounds",      ("livres", "libras") },
+                { "lb",          ("livre", "libra") },
+                { "lbs",         ("livres", "libras") },
+                { "ounce",       ("once", "onza") },
+                { "ounces",      ("onces", "onzas") },
+                { "oz",          ("oz", "oz") },
+                { "clove",       ("gousse", "diente") },
+                { "cloves",      ("gousses", "dientes") },
+                { "pinch",       ("pincée", "pizca") },
+                { "handful",     ("poignée", "puñado") },
+                { "slice",       ("tranche", "rebanada") },
+                { "slices",      ("tranches", "rebanadas") },
+                { "can",         ("boîte", "lata") },
+                { "package",     ("sachet", "paquete") },
+                { "bunch",       ("bouquet", "manojo") },
+                { "piece",       ("morceau", "pieza") },
+                { "pieces",      ("morceaux", "piezas") },
+                { "chopped",     ("haché", "picado") },
+                { "sliced",      ("tranché", "en rodajas") },
+                { "diced",       ("coupé en dés", "en cubos") },
+                { "minced",      ("émincé", "picado fino") },
+                { "grated",      ("râpé", "rallado") },
+                { "finely",      ("finement", "finamente") },
+                { "thinly",      ("finement", "finamente") },
+                { "large",       ("grand", "grande") },
+                { "small",       ("petit", "pequeño") },
+                { "medium",      ("moyen", "mediano") },
+                { "fresh",       ("frais", "fresco") },
+                { "dried",       ("séché", "seco") },
+                { "ground",      ("moulu", "molido") },
+                { "boneless",    ("désossé", "deshuesado") },
+                { "skinless",    ("sans peau", "sin piel") },
+            };
+
+            foreach (var kv in dict)
+            {
+                string mot = kv.Key;
+                string trad = fr ? kv.Value.fr : kv.Value.es;
+                // Remplacement insensible à la casse avec word boundary
+                m = System.Text.RegularExpressions.Regex.Replace(
+                    m, @"" + mot + @"", trad,
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            }
+
+            return m;
         }
 
         // ════════════════════════════════════════════════════════════

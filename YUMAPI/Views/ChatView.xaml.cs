@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Speech.Recognition;
@@ -17,20 +18,58 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using YUMAPI.Controllers;
 
 namespace YUMAPI.Views
 {
     public partial class ChatView : UserControl
     {
-        private const string TOKEN = "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";
+        private static string TOKEN => LireToken();
         private const string MODELE = "gpt-4o-mini";
         private const string API_URL = "https://models.inference.ai.azure.com/chat/completions";
+
+        private static string LireToken()
+        {
+            try
+            {
+                string chemin = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "Tokenignore", "token.txt");
+                return File.ReadAllText(chemin).Trim();
+            }
+            catch { return ""; }
+        }
 
         private HttpClient _client = new HttpClient();
         private List<object> _historique = new List<object>();
         private SpeechRecognitionEngine _micro;
         private bool _microActif = false;
         private Storyboard _microPulse;
+        private static readonly Dictionary<string, string> _traductionsRecettes = new Dictionary<string, string>
+        {
+            // Cuisines (FR/EN)
+            { "algerien", "Algerian" }, { "algérien", "Algerian" }, { "algerian", "Algerian" },
+            { "libanais", "Lebanese" }, { "lebanese", "Lebanese" },
+            { "marocain", "Moroccan" }, { "moroccan", "Moroccan" },
+            { "tunisien", "Tunisian" }, { "tunisian", "Tunisian" },
+            { "italien", "Italian" }, { "italian", "Italian" },
+            { "japonais", "Japanese" }, { "japanese", "Japanese" },
+            { "mexicain", "Mexican" }, { "mexican", "Mexican" },
+            { "chinois", "Chinese" }, { "chinese", "Chinese" },
+            { "indien", "Indian" }, { "indian", "Indian" },
+            { "grec", "Greek" }, { "greek", "Greek" },
+            { "francais", "French" }, { "français", "French" }, { "french", "French" },
+            { "espagnol", "Spanish" }, { "spanish", "Spanish" },
+            { "thai", "Thai" }, { "thaï", "Thai" },
+            { "americain", "American" }, { "américain", "American" }, { "american", "American" },
+            // Ingrédients / plats
+            { "poulet", "chicken" }, { "chicken", "chicken" },
+            { "boeuf", "beef" }, { "bœuf", "beef" }, { "beef", "beef" },
+            { "poisson", "fish" }, { "fish", "fish" },
+            { "agneau", "lamb" }, { "lamb", "lamb" },
+            { "pates", "pasta" }, { "pâtes", "pasta" }, { "pasta", "pasta" },
+            { "chocolat", "chocolate" }, { "chocolate", "chocolate" }
+        };
 
         public delegate void RechercheRecetteHandler(string motCle);
         public event RechercheRecetteHandler RechercheRecette;
@@ -50,13 +89,34 @@ namespace YUMAPI.Views
             // Initialiser le micro
             InitialiserMicro();
 
-            Loaded += (s, e) => AjouterMessageIA(
-                "Bonjour ! 👋 Je suis votre assistant culinaire Yum!\n\n" +
-                "Je peux vous aider à :\n" +
-                "• Trouver une recette avec vos ingrédients\n" +
-                "• Suggérer un plat selon vos envies\n\n" +
-                "Dites-moi ce que vous voulez manger ! 🍽️\n" +
-                "Vous pouvez aussi cliquer sur 🎤 pour parler !");
+            Loaded += (s, e) =>
+            {
+                // Traduire le statut "En ligne" au chargement
+                string l = TraductionService.LangueActuelle;
+                TxtStatut.Text = "● " + (l == "es" ? "En línea" : l == "fr" ? "En ligne" : "Online");
+
+                string bienvenue = l == "es"
+                    ? "¡Hola! 👋 Soy tu asistente culinario Yum!\n\n" +
+                      "Puedo ayudarte a:\n" +
+                      "• Encontrar recetas con tus ingredientes\n" +
+                      "• Sugerir un plato según tus deseos\n\n" +
+                      "¡Dime qué quieres comer! 🍽️\n" +
+                      "También puedes hacer clic en 🎤 para hablar!"
+                    : l == "fr"
+                    ? "Bonjour ! 👋 Je suis votre assistant culinaire Yum!\n\n" +
+                      "Je peux vous aider à :\n" +
+                      "• Trouver une recette avec vos ingrédients\n" +
+                      "• Suggérer un plat selon vos envies\n\n" +
+                      "Dites-moi ce que vous voulez manger ! 🍽️\n" +
+                      "Vous pouvez aussi cliquer sur 🎤 pour parler !"
+                    : "Hello! 👋 I'm your Yum! culinary assistant\n\n" +
+                      "I can help you:\n" +
+                      "• Find recipes with your ingredients\n" +
+                      "• Suggest a dish based on your cravings\n\n" +
+                      "Tell me what you want to eat! 🍽️\n" +
+                      "You can also click 🎤 to speak!";
+                AjouterMessageIA(bienvenue);
+            };
         }
 
         // ════════════════════════════════════════════════════════════
@@ -138,7 +198,9 @@ namespace YUMAPI.Views
                 BoutonMicro.Opacity = 1.0;
                 BoutonMicro.ToolTip = "Appuyer pour parler";
 
-                TxtStatut.Text = "● En ligne";
+                TxtStatut.Text = "● " + (TraductionService.LangueActuelle == "es" ? "En línea"
+                                   : TraductionService.LangueActuelle == "fr" ? "En ligne"
+                                   : "Online");
                 TxtStatut.Foreground = new SolidColorBrush(
                     (Color)ColorConverter.ConvertFromString("#4CAF50"));
             });
@@ -206,9 +268,27 @@ namespace YUMAPI.Views
             PanneauMessages.Children.Remove(indicateur);
             AjouterMessageIA(reponse);
 
+            // Vérifier que la recette existe dans l'API avant de lancer la recherche
             string motCle = ExtraireMotCleRecette(reponse);
             if (!string.IsNullOrEmpty(motCle) && RechercheRecette != null)
-                RechercheRecette(motCle);
+            {
+                bool existe = await VerifierRecetteExiste(motCle);
+                if (existe)
+                {
+                    RechercheRecette(motCle);
+                }
+                else
+                {
+                    // La recette n'existe pas → dire à l'IA de proposer autre chose
+                    string msgErreur = TraductionService.LangueActuelle == "es"
+                        ? "⚠️ Esa receta no está disponible en nuestra base. ¿Puedes sugerir otra?"
+                        : TraductionService.LangueActuelle == "fr"
+                            ? "⚠️ Cette recette n'est pas disponible. Peux-tu en suggérer une autre ?"
+                            : "⚠️ That recipe isn't available in our database. Can you suggest another one?";
+                    AjouterMessageIA(msgErreur);
+                }
+            }
+            // Le chat reste OUVERT
         }
 
         // ════════════════════════════════════════════════════════════
@@ -218,7 +298,9 @@ namespace YUMAPI.Views
         {
             try
             {
-                TxtStatut.Text = "● En train d'écrire...";
+                TxtStatut.Text = "● " + (TraductionService.LangueActuelle == "es" ? "Escribiendo..."
+                                   : TraductionService.LangueActuelle == "fr" ? "En train d'écrire..."
+                                   : "Typing...");
                 TxtStatut.Foreground = new SolidColorBrush(
                     (Color)ColorConverter.ConvertFromString("#FFA500"));
 
@@ -247,7 +329,9 @@ namespace YUMAPI.Views
 
                 _historique.Add(new { role = "assistant", content = texteIA });
 
-                TxtStatut.Text = "● En ligne";
+                TxtStatut.Text = "● " + (TraductionService.LangueActuelle == "es" ? "En línea"
+                                   : TraductionService.LangueActuelle == "fr" ? "En ligne"
+                                   : "Online");
                 TxtStatut.Foreground = new SolidColorBrush(
                     (Color)ColorConverter.ConvertFromString("#4CAF50"));
 
@@ -255,7 +339,9 @@ namespace YUMAPI.Views
             }
             catch
             {
-                TxtStatut.Text = "● En ligne";
+                TxtStatut.Text = "● " + (TraductionService.LangueActuelle == "es" ? "En línea"
+                                   : TraductionService.LangueActuelle == "fr" ? "En ligne"
+                                   : "Online");
                 TxtStatut.Foreground = new SolidColorBrush(
                     (Color)ColorConverter.ConvertFromString("#4CAF50"));
                 return "Désolé, je n'arrive pas à me connecter. Vérifiez votre connexion.";
@@ -265,34 +351,78 @@ namespace YUMAPI.Views
         private object[] BuildMessages()
         {
             var messages = new List<object>();
+
+            // Langue dynamique selon le choix de l'utilisateur
+            string langue = TraductionService.LangueActuelle == "es" ? "Spanish"
+                          : TraductionService.LangueActuelle == "fr" ? "French"
+                          : "English";
+
+            // Traductions du message de bienvenue selon la langue
+            string cuisinesMsg = langue == "fr"
+                ? "marocain→[RECETTE:Moroccan], japonais→[RECETTE:Japanese], italien→[RECETTE:Italian], " +
+                  "indien→[RECETTE:Indian], chinois→[RECETTE:Chinese], mexicain→[RECETTE:Mexican], " +
+                  "grec→[RECETTE:Greek], américain→[RECETTE:American], thaï→[RECETTE:Thai]"
+                : langue == "es"
+                ? "marroquí→[RECETTE:Moroccan], japonés→[RECETTE:Japanese], italiano→[RECETTE:Italian], " +
+                  "indio→[RECETTE:Indian], chino→[RECETTE:Chinese], mexicano→[RECETTE:Mexican], " +
+                  "griego→[RECETTE:Greek], americano→[RECETTE:American], tailandés→[RECETTE:Thai]"
+                : "moroccan→[RECETTE:Moroccan], japanese→[RECETTE:Japanese], italian→[RECETTE:Italian], " +
+                  "indian→[RECETTE:Indian], chinese→[RECETTE:Chinese], mexican→[RECETTE:Mexican], " +
+                  "greek→[RECETTE:Greek], american→[RECETTE:American], thai→[RECETTE:Thai]";
+
+            string ingredientsMsg = langue == "fr"
+                ? "poulet→[RECETTE:chicken], boeuf→[RECETTE:beef], pâtes→[RECETTE:pasta], poisson→[RECETTE:fish]"
+                : langue == "es"
+                ? "pollo→[RECETTE:chicken], ternera→[RECETTE:beef], pasta→[RECETTE:pasta], pescado→[RECETTE:fish]"
+                : "chicken→[RECETTE:chicken], beef→[RECETTE:beef], pasta→[RECETTE:pasta], fish→[RECETTE:fish]";
+
+            string nonDispo = langue == "fr"
+                ? "Si l'utilisateur demande une cuisine NON DISPONIBLE → dire gentiment que ce n'est pas disponible et proposer une alternative similaire."
+                : langue == "es"
+                ? "Si el usuario pide una cocina NO DISPONIBLE → decirle amablemente que no está disponible y proponer una alternativa similar."
+                : "If the user asks for an UNAVAILABLE cuisine → kindly say it's not available and suggest a similar alternative.";
+
+            string concis = langue == "fr" ? "Réponds en français, de façon chaleureuse. Maximum 3-4 phrases."
+                          : langue == "es" ? "Responde en español, de forma amigable. Máximo 3-4 frases."
+                          : "Reply in English, in a friendly way. Maximum 3-4 sentences.";
+
             messages.Add(new
             {
                 role = "system",
-                content = "Tu es un assistant culinaire expert intégré dans l'application Yum! Gourmet Studio. " +
-                          "Ton rôle est d'aider les utilisateurs à trouver des recettes. " +
-                          "Tu DOIS TOUJOURS inclure un tag [RECETTE:...] dans CHAQUE réponse, sans exception. " +
-                          "CUISINES DISPONIBLES dans notre base (UNIQUEMENT ces origines existent) : " +
-                          "American, British, Canadian, Chinese, Croatian, Dutch, Egyptian, Filipino, " +
-                          "French, Greek, Indian, Irish, Italian, Jamaican, Japanese, Kenyan, Malaysian, " +
-                          "Mexican, Moroccan, Polish, Portuguese, Russian, Spanish, Thai, Tunisian, " +
-                          "Turkish, Ukrainian, Vietnamese. " +
-                          "RÈGLES STRICTES : " +
-                          "1) Si l'utilisateur demande une cuisine DISPONIBLE → tag [RECETTE:NomEnAnglais] " +
-                          "   Exemples: marocain→[RECETTE:Moroccan], japonais→[RECETTE:Japanese], " +
-                          "   italien→[RECETTE:Italian], indien→[RECETTE:Indian], français→[RECETTE:French], " +
-                          "   chinois→[RECETTE:Chinese], mexicain→[RECETTE:Mexican], grec→[RECETTE:Greek], " +
-                          "   américain→[RECETTE:American], thaï→[RECETTE:Thai], tunisien→[RECETTE:Tunisian] " +
-                          "2) Si l'utilisateur demande une cuisine NON DISPONIBLE (andalou, algérien, libanais, persan, etc.) " +
-                          "   → NE PAS mettre de tag [RECETTE:...], et lui dire gentiment que cette cuisine " +
-                          "   n'est pas disponible dans notre application, et lui proposer une cuisine similaire disponible. " +
-                          "   Exemple: andalou → dire que ce n'est pas disponible, proposer Spanish ou Moroccan à la place. " +
-                          "3) Si l'utilisateur demande un ingrédient/plat → tag en anglais : " +
-                          "   poulet→[RECETTE:chicken], boeuf→[RECETTE:beef], pâtes→[RECETTE:pasta], " +
-                          "   poisson→[RECETTE:fish], agneau→[RECETTE:lamb], chocolat→[RECETTE:chocolate] " +
-                          "Réponds toujours en français, de façon chaleureuse. Sois concis (max 3-4 phrases)."
+                content = $"You are a friendly culinary assistant in the Yum! Gourmet Studio app. " +
+                          $"CRITICAL: You MUST ALWAYS reply in {langue}. NEVER use another language. " +
+                          $"YOUR BEHAVIOR: " +
+                          $"- First CONVERSE with the user to understand their tastes and preferences. " +
+                          $"- Ask 1-2 questions to understand what they want. " +
+                          $"- Only suggest a recipe AFTER understanding their needs. " +
+                          $"- IMPORTANT: Only use REAL recipe names or ingredients that exist in TheMealDB database. " +
+                          $"- Use SIMPLE English keywords for [RECETTE:...]: 'pasta', 'chicken', 'beef', 'fish', 'cheese', 'chocolate', etc. " +
+                          $"- NEVER invent recipe names. Use generic ingredient names as search keywords. " +
+                          $"- When confident, say enthusiastically that you found the perfect recipe, then add [RECETTE:keyword]. " +
+                          $"- Only include [RECETTE:...] tag when CONFIDENT about what the user wants. " +
+                          $"AVAILABLE CUISINES: American, British, Canadian, Chinese, Croatian, Dutch, Egyptian, " +
+                          $"Filipino, French, Greek, Indian, Irish, Italian, Jamaican, Japanese, Kenyan, Malaysian, " +
+                          $"Mexican, Moroccan, Polish, Portuguese, Russian, Spanish, Thai, Tunisian, Turkish, Ukrainian, Vietnamese. " +
+                          $"RULES: " +
+                          $"1) Available cuisine → [RECETTE:EnglishName]. Examples: {cuisinesMsg} " +
+                          $"2) {nonDispo} " +
+                          $"3) Ingredient/dish → translate to English: {ingredientsMsg} " +
+                          $"4) Keep responses SHORT (2-3 sentences max). Be warm and enthusiastic. " +
+                          $"{concis}"
             });
             messages.AddRange(_historique);
             return messages.ToArray();
+        }
+
+        private async System.Threading.Tasks.Task<bool> VerifierRecetteExiste(string motCle)
+        {
+            try
+            {
+                var ctrl = new YUMAPI.Controllers.MealController();
+                await ctrl.RechercherAsync(motCle);
+                return ctrl.ListeRecettes != null && ctrl.ListeRecettes.Count > 0;
+            }
+            catch { return false; }
         }
 
         private string ExtraireMotCleRecette(string reponse)
@@ -390,7 +520,7 @@ namespace YUMAPI.Views
             };
             bulle.Child = new TextBlock
             {
-                Text = "⏳ En train d'écrire...",
+                Text = "⏳ " + (TraductionService.LangueActuelle == "es" ? "Escribiendo..." : TraductionService.LangueActuelle == "fr" ? "En train d'écrire..." : "Typing..."),
                 Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888")),
                 FontSize = 12,
                 FontStyle = FontStyles.Italic

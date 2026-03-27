@@ -80,7 +80,11 @@ namespace YUMAPI.Models
 
             if (pseudoExiste)
             {
-                DerniereErreur = "Ce nom d'utilisateur est déjà pris.";
+                DerniereErreur = YUMAPI.Controllers.TraductionService.LangueActuelle == "es"
+                    ? "Este nombre de usuario ya está en uso."
+                    : YUMAPI.Controllers.TraductionService.LangueActuelle == "fr"
+                        ? "Ce nom d'utilisateur est déjà pris."
+                        : "This username is already taken.";
                 return false;
             }
 
@@ -118,7 +122,11 @@ namespace YUMAPI.Models
 
             if (user == null)
             {
-                DerniereErreur = "Nom d'utilisateur ou mot de passe incorrect.";
+                DerniereErreur = YUMAPI.Controllers.TraductionService.LangueActuelle == "es"
+                    ? "Nombre de usuario o contraseña incorrectos."
+                    : YUMAPI.Controllers.TraductionService.LangueActuelle == "fr"
+                        ? "Nom d'utilisateur ou mot de passe incorrect."
+                        : "Incorrect username or password.";
                 return false;
             }
 
@@ -134,4 +142,3 @@ namespace YUMAPI.Models
         }
     }
 }
-
