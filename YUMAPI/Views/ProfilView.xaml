@@ -94,7 +94,7 @@
                                        FontSize="20" VerticalAlignment="Center"
                                        Margin="0,0,14,0"/>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="Mes favoris"
+                                <TextBlock x:Name="TxtLabelFavoris" Text="Mes favoris"
                                            Foreground="White" FontSize="13"
                                            FontWeight="SemiBold"/>
                                 <TextBlock x:Name="TxtNbFavoris"
@@ -117,7 +117,7 @@
                                        FontSize="20" VerticalAlignment="Center"
                                        Margin="0,0,14,0"/>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                <TextBlock Text="Dernière recette consultée"
+                                <TextBlock x:Name="TxtLabelDerniereRecette" Text="Dernière recette consultée"
                                            Foreground="White" FontSize="13"
                                            FontWeight="SemiBold"/>
                                 <TextBlock x:Name="TxtDerniereRecette"
@@ -137,7 +137,7 @@
                 <!-- SÉLECTEUR DE THÈME -->
                 <StackPanel Margin="28,0,28,28">
 
-                    <TextBlock Text="🎨  Couleur du thème"
+                    <TextBlock x:Name="TxtLabelCouleur" Text="🎨  Couleur du thème"
                                Foreground="White"
                                FontSize="14"
                                FontWeight="SemiBold"

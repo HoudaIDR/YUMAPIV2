@@ -29,17 +29,45 @@ namespace YUMAPI.Views
                 ? user.Username[0].ToString().ToUpper()
                 : "?";
 
-            TxtDateCreation.Text = "Membre depuis le " + user.DateCreation.ToString(
-                "dd MMMM yyyy",
-                new CultureInfo("fr-FR"));
+            // Texte et format de date selon la langue active
+            string l = TraductionService.LangueActuelle;
+            string formatDate = l == "fr" ? "dd MMMM yyyy" : l == "es" ? "dd MMMM yyyy" : "MMMM dd, yyyy";
+            CultureInfo culture = l == "fr" ? new CultureInfo("fr-FR")
+                                : l == "es" ? new CultureInfo("es-ES")
+                                : new CultureInfo("en-US");
+            string labelMembre = l == "fr" ? "Membre depuis le "
+                               : l == "es" ? "Miembro desde el "
+                               : "Member since ";
+            TxtDateCreation.Text = labelMembre + user.DateCreation.ToString(formatDate, culture);
 
             int nbFavoris = user.Favoris != null ? user.Favoris.Count : 0;
-            TxtNbFavoris.Text = nbFavoris + (nbFavoris > 1 ? " recettes" : " recette");
+            string labelRecette = TraductionService.LangueActuelle == "es"
+                ? (nbFavoris > 1 ? " recetas" : " receta")
+                : TraductionService.LangueActuelle == "fr"
+                    ? (nbFavoris > 1 ? " recettes" : " recette")
+                    : (nbFavoris > 1 ? " recipes" : " recipe");
+            TxtNbFavoris.Text = nbFavoris + labelRecette;
 
             if (user.DerniereRecette != null)
                 TxtDerniereRecette.Text = user.DerniereRecette.Title;
             else
-                TxtDerniereRecette.Text = "Aucune recette consultée";
+                TxtDerniereRecette.Text = TraductionService.LangueActuelle == "es"
+                    ? "Ninguna receta consultada"
+                    : TraductionService.LangueActuelle == "fr"
+                        ? "Aucune recette consultée"
+                        : "No recipe viewed yet";
+
+            // Traduire les labels fixes selon la langue active
+            string lang = TraductionService.LangueActuelle;
+            TxtLabelFavoris.Text = lang == "es" ? "Mis favoritos"
+                                 : lang == "fr" ? "Mes favoris"
+                                 : "My favorites";
+            TxtLabelDerniereRecette.Text = lang == "es" ? "Última receta consultada"
+                                         : lang == "fr" ? "Dernière recette consultée"
+                                         : "Last viewed recipe";
+            TxtLabelCouleur.Text = lang == "es" ? "🎨  Color del tema"
+                                 : lang == "fr" ? "🎨  Couleur du thème"
+                                 : "🎨  Theme color";
 
             ThemeManager.ChangerCouleur(user.CouleurTheme ?? "#FF6B35");
             AppliquerCouleurSurInterface();
@@ -85,23 +113,27 @@ namespace YUMAPI.Views
             else if (hex == "#43A047") AjouterEffet(CerclVert, hex);
             else if (hex == "#8E24AA") AjouterEffet(CerclViolet, hex);
 
-            TxtCouleurActive.Text = "Couleur active : " + nom;
+            string labelCouleur = TraductionService.LangueActuelle == "es" ? "Color activo : "
+                             : TraductionService.LangueActuelle == "fr" ? "Couleur active : "
+                             : "Active color: ";
+            TxtCouleurActive.Text = labelCouleur + nom;
             TxtCouleurActive.Foreground = brosse;
         }
 
         private string ObtenirNomCouleur(string hex)
         {
             hex = (hex ?? "").Trim().ToUpper();
+            string l = TraductionService.LangueActuelle;
 
             switch (hex)
             {
-                case "#FF6B35": return "Orange";
-                case "#E91E8C": return "Rose";
-                case "#E53935": return "Rouge";
-                case "#1E88E5": return "Bleu";
-                case "#43A047": return "Vert";
-                case "#8E24AA": return "Violet";
-                default: return "Inconnue";
+                case "#FF6B35": return l == "es" ? "Naranja" : l == "fr" ? "Orange" : "Orange";
+                case "#E91E8C": return l == "es" ? "Rosa" : l == "fr" ? "Rose" : "Pink";
+                case "#E53935": return l == "es" ? "Rojo" : l == "fr" ? "Rouge" : "Red";
+                case "#1E88E5": return l == "es" ? "Azul" : l == "fr" ? "Bleu" : "Blue";
+                case "#43A047": return l == "es" ? "Verde" : l == "fr" ? "Vert" : "Green";
+                case "#8E24AA": return l == "es" ? "Violeta" : l == "fr" ? "Violet" : "Purple";
+                default: return l == "es" ? "Desconocido" : l == "fr" ? "Inconnue" : "Unknown";
             }
         }
 

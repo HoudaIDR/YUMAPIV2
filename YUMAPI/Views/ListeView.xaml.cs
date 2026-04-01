@@ -435,14 +435,24 @@ namespace YUMAPI.Views
         {
             _afficheFavoris = true;
             List<MealListItem> favoris = FavorisManager.GetFavoris();
+            string lf = TraductionService.LangueActuelle;
             TxtSectionTitle.Text = favoris.Count > 0
-                ? $"❤️ MES FAVORIS ({favoris.Count})"
-                : "❤️ AUCUN FAVORI";
+                ? (lf == "es" ? $"❤️ MIS FAVORITOS ({favoris.Count})"
+                 : lf == "fr" ? $"❤️ MES FAVORIS ({favoris.Count})"
+                 : $"❤️ MY FAVORITES ({favoris.Count})")
+                : (lf == "es" ? "❤️ SIN FAVORITOS"
+                 : lf == "fr" ? "❤️ AUCUN FAVORI"
+                 : "❤️ NO FAVORITES");
             ListeRecettes.ItemsSource = null;
             ListeRecettes.ItemsSource = favoris;
             BtnFavorisHaut.Text = "❤️";
-            BordureFavorisHaut.Background = new SolidColorBrush(
-                (Color)ColorConverter.ConvertFromString("#CC0000"));
+            // Assombrir la couleur du thème pour indiquer que les favoris sont actifs
+            Color couleurBase = (Color)ColorConverter.ConvertFromString(ThemeManager.CouleurHex);
+            Color couleurFoncee = Color.FromRgb(
+                (byte)(couleurBase.R * 0.6),
+                (byte)(couleurBase.G * 0.6),
+                (byte)(couleurBase.B * 0.6));
+            BordureFavorisHaut.Background = new SolidColorBrush(couleurFoncee);
         }
 
         // ════════════════════════════════════════════════════════════

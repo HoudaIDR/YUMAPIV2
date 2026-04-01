@@ -68,7 +68,7 @@ namespace YUMAPI.Views
             PanneauInstructionsNormal.Visibility = Visibility.Visible;
             BoutonDemarrer.Visibility = Visibility.Visible;
             TxtBtnSuivant.Text = TraductionService.T("suivant");
-            BtnSuivant.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+            BtnSuivant.Background = ThemeManager.CouleurAccent;
 
             LoadingText.Text = traductionActive ? TraductionService.T("traduction_en_cours") : TraductionService.T("chargement");
             LoadingSubText.Text = traductionActive ? TraductionService.T("ia_traduit") : TraductionService.T("recuperation");
@@ -293,6 +293,11 @@ namespace YUMAPI.Views
             PanneauInstructionsNormal.Visibility = Visibility.Collapsed;
             PanneauGuide.Visibility = Visibility.Visible;
             BoutonDemarrer.Visibility = Visibility.Collapsed;
+
+            // Traduire les boutons fixes du mode guidé selon la langue active
+            TxtBtnQuitter.Text = TraductionService.T("quitter");
+            TxtBtnPrecedent.Text = TraductionService.T("precedent");
+
             AfficherEtape(0);
         }
 
@@ -324,7 +329,7 @@ namespace YUMAPI.Views
             PanneauInstructionsNormal.Visibility = Visibility.Visible;
             BoutonDemarrer.Visibility = Visibility.Visible;
             TxtBtnSuivant.Text = TraductionService.T("suivant");
-            BtnSuivant.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+            BtnSuivant.Background = ThemeManager.CouleurAccent;
         }
 
         private void AfficherEtape(int index)
@@ -333,7 +338,7 @@ namespace YUMAPI.Views
             TxtEtapeActuelle.Text = _etapes[index];
             TxtNumeroEtape.Text = TraductionService.T("etape") + " " + (index + 1) + "/" + _etapes.Count;
             TxtBtnSuivant.Text = index == _etapes.Count - 1 ? TraductionService.T("terminer") : TraductionService.T("suivant");
-            BtnSuivant.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+            BtnSuivant.Background = ThemeManager.CouleurAccent;
             BtnPrecedent.Opacity = index == 0 ? 0.4 : 1.0;
             if (BarreEtapes.Parent is Border parent)
                 BarreEtapes.Width = parent.ActualWidth * (double)(index + 1) / _etapes.Count;
