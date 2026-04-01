@@ -1,32 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ============================================================
+//  Controllers/ThemeManager.cs
+//  Gestion de la couleur accent - mise à jour globale via App.Resources
+// ============================================================
+
+using System.Windows;
 using System.Windows.Media;
 
 namespace YUMAPI.Controllers
 {
-    // Classe statique = accessible partout sans créer d'objet
     public static class ThemeManager
     {
-        // On stocke juste le code couleur en texte
         public static string CouleurHex = "#FF6B35";
 
-        // Propriété qui retourne une nouvelle brosse à chaque fois
         public static SolidColorBrush CouleurAccent
         {
             get
             {
                 return new SolidColorBrush(
-                    (Color)ColorConverter.ConvertFromString(CouleurHex)
-                );
+                    (Color)ColorConverter.ConvertFromString(CouleurHex));
             }
         }
 
         public static void ChangerCouleur(string hex)
         {
             CouleurHex = hex;
+
+            // Mettre à jour la ressource globale → tous les éléments se rafraîchissent
+            if (Application.Current != null)
+            {
+                Color couleur = (Color)ColorConverter.ConvertFromString(hex);
+                Application.Current.Resources["AccentColor"] = new SolidColorBrush(couleur);
+            }
         }
     }
 }

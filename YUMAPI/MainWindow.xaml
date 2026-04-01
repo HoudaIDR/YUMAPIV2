@@ -17,7 +17,7 @@
         <Border x:Name="BoutonChat"
                 Width="56" Height="56"
                 CornerRadius="28"
-                Background="#FF6B35"
+                Background="{DynamicResource AccentColor}"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Margin="0,0,30,30"
@@ -47,5 +47,12 @@
             <!-- ChatView sera injecté ici -->
             <Grid x:Name="ContainerChat"/>
         </Border>
+
+        <!-- Overlay bienvenue -->
+        <Grid x:Name="ContainerBienvenue" Visibility="Collapsed" Panel.ZIndex="99"/>
+
+        <!-- Overlay profil -->
+        <Grid x:Name="ContainerProfil" Visibility="Collapsed" Panel.ZIndex="100"/>
+
     </Grid>
 </Window>

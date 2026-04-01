@@ -32,7 +32,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Background="#FF6B35"
+                <Border Grid.Column="0" Background="{DynamicResource AccentColor}"
                         Width="44" Height="44" CornerRadius="22">
                     <TextBlock Text="🤖" FontSize="22"
                                HorizontalAlignment="Center"
@@ -124,7 +124,7 @@
 
                 <!-- ➤ Bouton envoyer -->
                 <Border Grid.Column="2"
-                        Background="#FF6B35" Width="46" Height="46"
+                        Background="{DynamicResource AccentColor}" Width="46" Height="46"
                         CornerRadius="23" Cursor="Hand"
                         MouseDown="BtnEnvoyer_Click">
                     <TextBlock Text="➤" Foreground="White" FontSize="16"

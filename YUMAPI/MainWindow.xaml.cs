@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using YUMAPI.Views;
+using YUMAPI.Models;
 
 namespace YUMAPI
 {
@@ -16,6 +17,7 @@ namespace YUMAPI
         private RegisterView registerView;
         private ListeView listeViewCourante;
         private ChatView chatView;
+        private DetailView detailViewCourante;
 
         public MainWindow()
         {
@@ -62,9 +64,11 @@ namespace YUMAPI
             DetailView detailView = new DetailView();
 
             listeViewCourante = listeView;
+            detailViewCourante = detailView;
 
             listeView.RecetteCliquee += (id) => detailView.ChargerDetail(id);
             listeView.Deconnexion += AfficherLogin;
+            listeView.OuvrirProfil += AfficherProfil;
 
             Grid grille = new Grid();
             grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(360) });
@@ -78,8 +82,10 @@ namespace YUMAPI
 
             ContainerPrincipal.Children.Add(grille);
 
-            // Afficher le bouton chat flottant
             BoutonChat.Visibility = Visibility.Visible;
+
+            // Afficher la page de bienvenue
+            AfficherBienvenue(username);
 
             // Préparer le ChatView
             chatView = new ChatView();
@@ -95,7 +101,48 @@ namespace YUMAPI
             ContainerChat.Children.Add(chatView);
         }
 
-        // ── Clic bouton chat flottant ─────────────────────────────────────
+        // ── Page de bienvenue ─────────────────────────────────────────────
+        private void AfficherBienvenue(string username)
+        {
+            BienvenueView bienvenueView = new BienvenueView();
+            bienvenueView.OuiClique += (idPlat) =>
+            {
+                FermerBienvenue();
+                Dispatcher.InvokeAsync(() =>
+                    detailViewCourante.ChargerDetail(idPlat),
+                    System.Windows.Threading.DispatcherPriority.Loaded);
+            };
+            bienvenueView.NonClique += () => FermerBienvenue();
+            ContainerBienvenue.Children.Clear();
+            ContainerBienvenue.Children.Add(bienvenueView);
+            ContainerBienvenue.Visibility = Visibility.Visible;
+            bienvenueView.Initialiser(username);
+        }
+
+        private void FermerBienvenue()
+        {
+            ContainerBienvenue.Visibility = Visibility.Collapsed;
+            ContainerBienvenue.Children.Clear();
+        }
+
+        // ── Page de profil ─────────────────────────────────────────────────
+        private void AfficherProfil()
+        {
+            ProfilView profilView = new ProfilView();
+            profilView.Fermer += () => FermerProfil();
+            ContainerProfil.Children.Clear();
+            ContainerProfil.Children.Add(profilView);
+            ContainerProfil.Visibility = Visibility.Visible;
+            profilView.Initialiser();
+        }
+
+        private void FermerProfil()
+        {
+            ContainerProfil.Visibility = Visibility.Collapsed;
+            ContainerProfil.Children.Clear();
+        }
+
+        // ── Clic bouton chat flottant ─────────────────────────────────────────
         private void BoutonChat_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (PanneauChat.Visibility == Visibility.Visible)

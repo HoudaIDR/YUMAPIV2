@@ -64,14 +64,14 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
                 <TextBlock x:Name="LoadingText" Text="Chargement..."
-                           Foreground="#FF6B35" FontSize="18" FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentColor}" FontSize="18" FontWeight="SemiBold"
                            HorizontalAlignment="Center" Margin="0,0,0,12"/>
                 <TextBlock x:Name="LoadingSubText" Text="Récupération de la recette"
                            Foreground="#555555" FontSize="13" HorizontalAlignment="Center"/>
                 <Border Width="260" Height="4" CornerRadius="2"
                         Background="#222222" Margin="0,24,0,0">
                     <Border x:Name="BarreProgression" Height="4" CornerRadius="2"
-                            Background="#FF6B35" HorizontalAlignment="Left" Width="0">
+                            Background="{DynamicResource AccentColor}" HorizontalAlignment="Left" Width="0">
                         <Border.Triggers>
                             <EventTrigger RoutedEvent="Border.Loaded">
                                 <BeginStoryboard>
@@ -109,7 +109,7 @@
                         <StackPanel Grid.Row="0" Orientation="Horizontal"
                                     Margin="0,0,0,12" VerticalAlignment="Center">
                             <Border x:Name="TagCategorieBorder"
-                                    Background="#FF6B35" CornerRadius="20" Padding="14,6">
+                                    Background="{DynamicResource AccentColor}" CornerRadius="20" Padding="14,6">
                                 <TextBlock x:Name="TagCategorie"
                                            Foreground="White" FontSize="11" FontWeight="Bold"/>
                             </Border>
@@ -120,7 +120,7 @@
                             </Border>
                             <Border x:Name="BadgeCalories" Background="#222222"
                                     CornerRadius="20" Padding="14,6" Margin="8,0,0,0"
-                                    BorderBrush="#FF6B35" BorderThickness="1"
+                                    BorderBrush="{DynamicResource AccentColor}" BorderThickness="1"
                                     Visibility="Collapsed">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="🔥 " Foreground="White" FontSize="11"/>
@@ -129,7 +129,7 @@
                                 </StackPanel>
                             </Border>
                             <Border x:Name="BoutonFavoriDetail"
-                                    Background="#FF6B35" Width="36" Height="36"
+                                    Background="{DynamicResource AccentColor}" Width="36" Height="36"
                                     CornerRadius="18" Margin="12,0,0,0"
                                     Cursor="Hand" MouseDown="BtnFavoriDetail_Click">
                                 <TextBlock x:Name="CoeurDetail" Text="🤍" FontSize="16"
@@ -182,7 +182,7 @@
                                                    FontSize="9" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                     <Border x:Name="BtnPlus" Width="28" Height="28"
-                                            CornerRadius="14" Background="#FF6B35"
+                                            CornerRadius="14" Background="{DynamicResource AccentColor}"
                                             Cursor="Hand" MouseDown="BtnPlus_Click">
                                         <TextBlock Text="+" Foreground="White" FontSize="16"
                                                    FontWeight="Bold"
@@ -208,7 +208,7 @@
                                        FontSize="22" FontWeight="Bold"
                                        VerticalAlignment="Center"/>
                             <Border Grid.Column="1" x:Name="BoutonDemarrer"
-                                    Background="#FF6B35" CornerRadius="20"
+                                    Background="{DynamicResource AccentColor}" CornerRadius="20"
                                     Padding="16,8" Cursor="Hand"
                                     MouseDown="BtnDemarrerRecette_Click">
                                 <StackPanel Orientation="Horizontal">
@@ -232,7 +232,7 @@
 
                         <!-- MODE GUIDÉ -->
                         <Border x:Name="PanneauGuide" Background="#1A1A1A"
-                                CornerRadius="16" BorderBrush="#FF6B35"
+                                CornerRadius="16" BorderBrush="{DynamicResource AccentColor}"
                                 BorderThickness="1" Visibility="Collapsed">
                             <StackPanel Margin="25">
 
@@ -244,12 +244,12 @@
                                     <Border Grid.Column="0" Background="#222222"
                                             CornerRadius="4" Height="6"
                                             VerticalAlignment="Center">
-                                        <Border x:Name="BarreEtapes" Background="#FF6B35"
+                                        <Border x:Name="BarreEtapes" Background="{DynamicResource AccentColor}"
                                                 CornerRadius="4" HorizontalAlignment="Left"
                                                 Width="0"/>
                                     </Border>
                                     <TextBlock x:Name="TxtNumeroEtape" Grid.Column="1"
-                                               Text="Étape 1/1" Foreground="#FF6B35"
+                                               Text="Étape 1/1" Foreground="{DynamicResource AccentColor}"
                                                FontSize="12" FontWeight="Bold"
                                                Margin="12,0,0,0" VerticalAlignment="Center"/>
                                 </Grid>
@@ -271,18 +271,18 @@
                                             CornerRadius="12" Padding="12,10"
                                             Cursor="Hand" Margin="0,0,6,0"
                                             MouseDown="BtnQuitterGuide_Click">
-                                        <TextBlock Text="✕  Quitter" Foreground="#999999"
+                                        <TextBlock x:Name="TxtBtnQuitter" Text="✕  Quitter" Foreground="#999999"
                                                    FontSize="13" HorizontalAlignment="Center"/>
                                     </Border>
                                     <Border x:Name="BtnPrecedent" Grid.Column="1"
                                             Background="#222222" CornerRadius="12"
                                             Padding="12,10" Cursor="Hand" Margin="0,0,6,0"
                                             MouseDown="BtnPrecedentEtape_Click">
-                                        <TextBlock Text="◀  Précédent" Foreground="White"
+                                        <TextBlock x:Name="TxtBtnPrecedent" Text="◀  Précédent" Foreground="White"
                                                    FontSize="13" HorizontalAlignment="Center"/>
                                     </Border>
                                     <Border x:Name="BtnSuivant" Grid.Column="2"
-                                            Background="#FF6B35" CornerRadius="12"
+                                            Background="{DynamicResource AccentColor}" CornerRadius="12"
                                             Padding="12,10" Cursor="Hand"
                                             MouseDown="BtnSuivantEtape_Click">
                                         <TextBlock x:Name="TxtBtnSuivant" Text="Suivant  ▶"

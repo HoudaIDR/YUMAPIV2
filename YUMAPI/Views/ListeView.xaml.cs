@@ -63,9 +63,21 @@ namespace YUMAPI.Views
         public delegate void DeconnexionHandler();
         public event DeconnexionHandler Deconnexion;
 
+        public delegate void OuvrirProfilHandler();
+        public event OuvrirProfilHandler OuvrirProfil;
+
         public ListeView()
         {
             InitializeComponent();
+
+            // Mettre à jour les cœurs au chargement de la liste
+            ListeRecettes.Loaded += (s2, e2) =>
+            {
+                // Accéder au ScrollViewer interne de la ListView
+                var sv = FindScrollViewer(ListeRecettes);
+                if (sv != null)
+                    sv.ScrollChanged += (s3, e3) => MettreAJourCoeursInternal();
+            };
 
             Loaded += async (s, e) =>
             {
@@ -411,11 +423,63 @@ namespace YUMAPI.Views
             TxtSectionTitle.Text = favoris.Count > 0
                 ? $"❤️ MES FAVORIS ({favoris.Count})"
                 : "❤️ AUCUN FAVORI";
+
+            // Désactiver la virtualisation pour les favoris
+            ListeRecettes.SetValue(VirtualizingPanel.IsVirtualizingProperty, false);
             ListeRecettes.ItemsSource = null;
             ListeRecettes.ItemsSource = favoris;
             BtnFavorisHaut.Text = "❤️";
             BordureFavorisHaut.Background = new SolidColorBrush(
                 (Color)ColorConverter.ConvertFromString("#CC0000"));
+
+            Dispatcher.InvokeAsync(async () => { await System.Threading.Tasks.Task.Delay(200); MettreAJourCoeursInternal(); });
+        }
+
+        // ── Met à jour tous les boutons ❤ selon les favoris ──────────────
+        private System.Windows.Controls.ScrollViewer FindScrollViewer(System.Windows.DependencyObject d)
+        {
+            if (d is System.Windows.Controls.ScrollViewer sv) return sv;
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(d); i++)
+            {
+                var result = FindScrollViewer(System.Windows.Media.VisualTreeHelper.GetChild(d, i));
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void MettreAJourCoeurs()
+        {
+            MettreAJourCoeursInternal();
+        }
+
+        private void MettreAJourCoeursInternal()
+        {
+            ListeRecettes.UpdateLayout();
+            foreach (var item in ListeRecettes.Items)
+            {
+                MealListItem recette = item as MealListItem;
+                if (recette == null) continue;
+                ListViewItem lvi = ListeRecettes.ItemContainerGenerator
+                    .ContainerFromItem(item) as ListViewItem;
+                if (lvi == null) continue;
+                Border bouton = TrouverBoutonCoeur(lvi);
+                if (bouton == null) continue;
+                TextBlock coeur = bouton.Child as TextBlock;
+                if (coeur != null)
+                    coeur.Text = FavorisManager.EstFavori(recette.Id) ? "❤️" : "🤍";
+            }
+        }
+
+        private Border TrouverBoutonCoeur(System.Windows.DependencyObject parent)
+        {
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is Border b && b.Tag is MealListItem) return b;
+                var result = TrouverBoutonCoeur(child);
+                if (result != null) return result;
+            }
+            return null;
         }
 
         // ════════════════════════════════════════════════════════════
@@ -479,6 +543,12 @@ namespace YUMAPI.Views
         {
             UserController.SeDeconnecter();
             if (Deconnexion != null) Deconnexion();
+        }
+
+        private void BtnAvatar_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (OuvrirProfil != null)
+                OuvrirProfil();
         }
 
         // ════════════════════════════════════════════════════════════

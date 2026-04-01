@@ -5,6 +5,10 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
 
+        <!-- Couleur accent dynamique - changée par ThemeManager -->
+        <SolidColorBrush x:Key="AccentColor" Color="#FF6B35"/>
+
+
         <!-- ══════════════════════════════════════════════════════════ -->
         <!--  SCROLLBAR DESIGN - Fine, orange, arrondie                -->
         <!-- ══════════════════════════════════════════════════════════ -->
@@ -31,7 +35,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Thumb">
-                        <Border Background="#FF6B35"
+                        <Border Background="{DynamicResource AccentColor}"
                                 CornerRadius="4"
                                 Margin="2,0"/>
                     </ControlTemplate>

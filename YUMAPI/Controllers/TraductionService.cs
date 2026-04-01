@@ -347,6 +347,38 @@ namespace YUMAPI.Controllers
             catch { return null; }
         }
 
+
+        // ════════════════════════════════════════════════════════════
+        //  PROPOSER UN PLAT ALÉATOIRE (Valeria)
+        // ════════════════════════════════════════════════════════════
+        public static async Task<string[]> ProposerUnPlat()
+        {
+            string[] lettres = { "a", "b", "c", "s", "p", "r", "t", "g", "m", "l" };
+            try
+            {
+                Random random = new Random();
+                string lettre = lettres[random.Next(lettres.Length)];
+                string url = "https://www.themealdb.com/api/json/v1/1/search.php?f=" + lettre;
+                HttpResponseMessage rep = await _client.GetAsync(url);
+                string repJson = await rep.Content.ReadAsStringAsync();
+                using JsonDocument docApi = JsonDocument.Parse(repJson);
+                JsonElement meals = docApi.RootElement.GetProperty("meals");
+                if (meals.ValueKind == JsonValueKind.Null) return null;
+                int nbPlats = meals.GetArrayLength();
+                int index = random.Next(nbPlats);
+                string vraiNom = meals[index].GetProperty("strMeal").GetString();
+                string vraiId = meals[index].GetProperty("idMeal").GetString();
+                string[] emojis = { "🍝", "🍜", "🍲", "🥘", "🍛", "🥗", "🍖", "🍗", "🥩", "🫕" };
+                string emoji = emojis[random.Next(emojis.Length)];
+                string langue = LangueActuelle;
+                string phrase = langue == "es" ? "Hoy podríamos cocinar... " + vraiNom + " " + emoji
+                              : langue == "fr" ? "Aujourd'hui on pourrait cuisiner... " + vraiNom + " " + emoji
+                              : "Today we could cook... " + vraiNom + " " + emoji;
+                return new string[] { phrase, vraiId };
+            }
+            catch { return null; }
+        }
+
         // ════════════════════════════════════════════════════════════
         //  HELPERS PRIVÉS
         // ════════════════════════════════════════════════════════════

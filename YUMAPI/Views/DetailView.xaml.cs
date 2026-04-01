@@ -151,10 +151,36 @@ namespace YUMAPI.Views
             }
         }
 
+        // ── Longueur max du texte affiché dans le badge orange ───────────
+        private const int LONGUEUR_MAX_BADGE = 18;
+
         private void AjouterCarteIngredient(string mesure, string ingredient)
         {
             if (string.IsNullOrWhiteSpace(ingredient)) return;
 
+            // --- Préparer le texte de la mesure ---
+            string mesureBrute = string.IsNullOrWhiteSpace(mesure) ? "—" : mesure.Trim();
+
+            // Si la mesure est trop longue pour le badge, on la coupe
+            // et on affiche le reste sous l'ingrédient en complément
+            string texteBadge;
+            string mesureSurplus = "";
+
+            if (mesureBrute.Length > LONGUEUR_MAX_BADGE)
+            {
+                // On cherche à couper proprement sur un espace si possible
+                int coupure = mesureBrute.LastIndexOf(' ', LONGUEUR_MAX_BADGE);
+                if (coupure < 5) coupure = LONGUEUR_MAX_BADGE; // Pas d'espace trouvé → couper brutalement
+
+                texteBadge = mesureBrute.Substring(0, coupure).Trim();
+                mesureSurplus = mesureBrute.Substring(coupure).Trim();
+            }
+            else
+            {
+                texteBadge = mesureBrute;
+            }
+
+            // --- Carte extérieure ---
             Border carte = new Border
             {
                 Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E")),
@@ -165,48 +191,70 @@ namespace YUMAPI.Views
                 BorderThickness = new Thickness(1)
             };
 
+            // --- Grille : colonne badge | colonne texte ingrédient ---
             Grid g = new Grid();
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // Badge rectangulaire orange
+            // Badge orange avec la mesure tronquée
             Border badge = new Border
             {
                 Background = ThemeManager.CouleurAccent,
                 CornerRadius = new CornerRadius(8),
-                Padding = new Thickness(14, 8, 14, 8),
-                MinWidth = 70,
+                Padding = new Thickness(10, 8, 10, 8),
+                MaxWidth = 130,              // Largeur max du badge
+                MinWidth = 50,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Center
             };
 
             badge.Child = new TextBlock
             {
-                Text = string.IsNullOrWhiteSpace(mesure) ? "—" : mesure.Trim(),
+                Text = texteBadge,
                 Foreground = Brushes.White,
-                FontSize = 12,
+                FontSize = 11,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.NoWrap
+                TextWrapping = TextWrapping.Wrap,   // Wrap dans le badge si besoin
             };
 
             Grid.SetColumn(badge, 0);
             g.Children.Add(badge);
 
-            TextBlock txI = new TextBlock
+            // Colonne droite : ingrédient + éventuel surplus de mesure
+            StackPanel colonneTexte = new StackPanel
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(12, 0, 0, 0)
+            };
+
+            // Nom de l'ingrédient
+            colonneTexte.Children.Add(new TextBlock
             {
                 Text = ingredient.Trim(),
                 Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CCCCCC")),
                 FontSize = 14,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(14, 0, 0, 0),
                 TextWrapping = TextWrapping.Wrap
-            };
+            });
 
-            Grid.SetColumn(txI, 1);
-            g.Children.Add(txI);
+            // Si la mesure était trop longue, afficher la suite en petit gris clair
+            if (!string.IsNullOrEmpty(mesureSurplus))
+            {
+                colonneTexte.Children.Add(new TextBlock
+                {
+                    Text = mesureSurplus,
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888")),
+                    FontSize = 11,
+                    FontStyle = FontStyles.Italic,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 2, 0, 0)
+                });
+            }
+
+            Grid.SetColumn(colonneTexte, 1);
+            g.Children.Add(colonneTexte);
 
             carte.Child = g;
             PanneauIngredients.Children.Add(carte);
