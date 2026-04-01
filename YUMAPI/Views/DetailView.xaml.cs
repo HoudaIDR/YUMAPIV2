@@ -97,8 +97,9 @@ namespace YUMAPI.Views
             AppliquerCouleur();
             CoeurDetail.Text = FavorisManager.EstFavori(id) ? "❤️" : "🤍";
             DetailTitre.Text = recette.strMeal;
-            TagCategorie.Text = recette.strCategory;
-            TagPays.Text = recette.strArea;
+            // Traduire la catégorie et le pays selon la langue active
+            TagCategorie.Text = TraductionService.TraduireCategorie(recette.strCategory);
+            TagPays.Text = TraductionService.TraduirePays(recette.strArea);
             DetailInstructions.Text = recette.strInstructions;
 
             // Traduire les titres et boutons selon la langue

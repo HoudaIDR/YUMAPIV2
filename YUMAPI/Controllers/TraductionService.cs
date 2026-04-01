@@ -212,6 +212,7 @@ namespace YUMAPI.Controllers
                 { "tablespoon",  ("cuillère à soupe", "cucharada") },
                 { "tablespoons", ("cuillères à soupe", "cucharadas") },
                 { "tbsp",        ("c. à soupe", "cda.") },
+                { "tblsp",       ("c. à soupe", "cda.") },
                 { "teaspoon",    ("cuillère à café", "cucharadita") },
                 { "teaspoons",   ("cuillères à café", "cucharaditas") },
                 { "tsp",         ("c. à café", "cdita.") },
@@ -256,13 +257,109 @@ namespace YUMAPI.Controllers
             {
                 string mot = kv.Key;
                 string trad = fr ? kv.Value.fr : kv.Value.es;
-                // Remplacement insensible à la casse avec word boundary
-                m = System.Text.RegularExpressions.Regex.Replace(
-                    m, @"" + mot + @"", trad,
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                // On découpe la mesure en mots, on traduit chaque mot reconnu
+                // et on recolle le tout — simple et lisible
+                string[] mots = m.Split(' ');
+                for (int i = 0; i < mots.Length; i++)
+                {
+                    if (string.Equals(mots[i], mot, StringComparison.OrdinalIgnoreCase))
+                        mots[i] = trad;
+                }
+                m = string.Join(" ", mots);
             }
 
             return m;
+        }
+
+
+        // ════════════════════════════════════════════════════════════
+        //  TRADUCTION DES CATÉGORIES
+        // ════════════════════════════════════════════════════════════
+        public static string TraduireCategorie(string categorie)
+        {
+            if (string.IsNullOrWhiteSpace(categorie)) return categorie;
+            if (LangueActuelle == "en") return categorie;
+
+            bool fr = LangueActuelle == "fr";
+
+            var dict = new System.Collections.Generic.Dictionary<string, (string fr, string es)>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Beef",           ("Bœuf",          "Res")           },
+                { "Chicken",        ("Poulet",         "Pollo")         },
+                { "Lamb",           ("Agneau",         "Cordero")       },
+                { "Pork",           ("Porc",           "Cerdo")         },
+                { "Seafood",        ("Fruits de mer",  "Mariscos")      },
+                { "Pasta",          ("Pâtes",          "Pasta")         },
+                { "Dessert",        ("Dessert",        "Postre")        },
+                { "Vegetarian",     ("Végétarien",     "Vegetariano")   },
+                { "Vegan",          ("Végan",          "Vegano")        },
+                { "Breakfast",      ("Petit-déjeuner", "Desayuno")      },
+                { "Starter",        ("Entrée",         "Entrada")       },
+                { "Side",           ("Accompagnement", "Guarnición")    },
+                { "Miscellaneous",  ("Divers",         "Varios")        },
+                { "Goat",           ("Chèvre",         "Cabra")         },
+            };
+
+            if (dict.ContainsKey(categorie.Trim()))
+            {
+                var val = dict[categorie.Trim()];
+                return fr ? val.fr : val.es;
+            }
+            return categorie;
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  TRADUCTION DES PAYS / ORIGINES
+        // ════════════════════════════════════════════════════════════
+        public static string TraduirePays(string pays)
+        {
+            if (string.IsNullOrWhiteSpace(pays)) return pays;
+            if (LangueActuelle == "en") return pays;
+
+            bool fr = LangueActuelle == "fr";
+
+            var dict = new System.Collections.Generic.Dictionary<string, (string fr, string es)>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "American",   ("Américaine",   "Americana")   },
+                { "British",    ("Britannique",  "Británica")   },
+                { "Canadian",   ("Canadienne",   "Canadiense")  },
+                { "Chinese",    ("Chinoise",     "China")       },
+                { "Croatian",   ("Croate",       "Croata")      },
+                { "Dutch",      ("Néerlandaise", "Holandesa")   },
+                { "Egyptian",   ("Égyptienne",   "Egipcia")     },
+                { "Filipino",   ("Philippinne",  "Filipina")    },
+                { "French",     ("Française",    "Francesa")    },
+                { "Greek",      ("Grecque",      "Griega")      },
+                { "Indian",     ("Indienne",     "India")       },
+                { "Irish",      ("Irlandaise",   "Irlandesa")   },
+                { "Italian",    ("Italienne",    "Italiana")    },
+                { "Jamaican",   ("Jamaïcaine",   "Jamaicana")   },
+                { "Japanese",   ("Japonaise",    "Japonesa")    },
+                { "Kenyan",     ("Kényane",      "Keniana")     },
+                { "Malaysian",  ("Malaisienne",  "Malaya")      },
+                { "Mexican",    ("Mexicaine",    "Mexicana")    },
+                { "Moroccan",   ("Marocaine",    "Marroquí")    },
+                { "Polish",     ("Polonaise",    "Polaca")      },
+                { "Portuguese", ("Portugaise",   "Portuguesa")  },
+                { "Russian",    ("Russe",        "Rusa")        },
+                { "Spanish",    ("Espagnole",    "Española")    },
+                { "Thai",       ("Thaïlandaise", "Tailandesa")  },
+                { "Tunisian",   ("Tunisienne",   "Tunecina")    },
+                { "Turkish",    ("Turque",       "Turca")       },
+                { "Ukrainian",  ("Ukrainienne",  "Ucraniana")   },
+                { "Algerian",   ("Algérienne",   "Argelina")    },
+                { "Lebanese",   ("Libanaise",    "Libanesa")    },
+                { "Vietnamese", ("Vietnamienne", "Vietnamita")  },
+                { "Australian", ("Australienne", "Australiana") },
+            };
+
+            if (dict.ContainsKey(pays.Trim()))
+            {
+                var val = dict[pays.Trim()];
+                return fr ? val.fr : val.es;
+            }
+            return pays;
         }
 
         // ════════════════════════════════════════════════════════════

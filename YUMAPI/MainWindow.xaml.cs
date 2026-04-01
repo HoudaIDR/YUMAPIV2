@@ -6,6 +6,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using YUMAPI.Controllers;
 using YUMAPI.Views;
 using YUMAPI.Models;
 
@@ -41,6 +42,10 @@ namespace YUMAPI
             BoutonChat.Visibility = Visibility.Collapsed;
             PanneauChat.Visibility = Visibility.Collapsed;
 
+            // Réinitialiser la couleur à orange (neutre) sur la page de connexion
+            // La vraie couleur du compte sera chargée après la connexion
+            ThemeManager.ChangerCouleur("#FF6B35");
+
             loginView.Vider();
             ContainerPrincipal.Children.Clear();
             ContainerPrincipal.Children.Add(loginView);
@@ -59,6 +64,13 @@ namespace YUMAPI
         {
             ContainerPrincipal.Children.Clear();
             PanneauChat.Visibility = Visibility.Collapsed;
+
+            // Appliquer la couleur sauvegardée du compte qui vient de se connecter
+            if (UserController.UtilisateurConnecte != null)
+            {
+                string couleur = UserController.UtilisateurConnecte.CouleurTheme ?? "#FF6B35";
+                ThemeManager.ChangerCouleur(couleur);
+            }
 
             ListeView listeView = new ListeView();
             DetailView detailView = new DetailView();

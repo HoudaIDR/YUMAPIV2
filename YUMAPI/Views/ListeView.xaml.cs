@@ -279,10 +279,12 @@ namespace YUMAPI.Views
             await Task.Delay(500);
             if (motCle != SearchBox.Text) return;
 
-            TxtSectionTitle.Text = "RECHERCHE...";
+            string l3 = TraductionService.LangueActuelle;
+            TxtSectionTitle.Text = l3 == "es" ? "BUSCANDO..." : l3 == "fr" ? "RECHERCHE..." : "SEARCHING...";
             await ChargerRecettes(motCle);
             int n = _recettesActuelles?.Count ?? 0;
-            TxtSectionTitle.Text = n > 0 ? $"RÉSULTATS : {n}" : "AUCUN RÉSULTAT";
+            string labelAucun = l3 == "es" ? "SIN RESULTADOS" : l3 == "fr" ? "AUCUN RÉSULTAT" : "NO RESULTS";
+            TxtSectionTitle.Text = n > 0 ? $"RÉSULTATS : {n}" : labelAucun;
         }
 
         private void AfficherSuggestions(List<MealListItem> suggestions, string motCle)
@@ -367,7 +369,9 @@ namespace YUMAPI.Views
         private async Task ChargerEtAfficher(string titre)
         {
             await ChargerRecettes(titre);
-            TxtSectionTitle.Text = $"RÉSULTATS POUR \"{titre.ToUpper()}\"";
+            string l2 = TraductionService.LangueActuelle;
+            string labelResultat2 = l2 == "es" ? "RESULTADOS PARA" : l2 == "fr" ? "RÉSULTATS POUR" : "RESULTS FOR";
+            TxtSectionTitle.Text = $"{labelResultat2} \"{titre.ToUpper()}\"";
         }
 
         private void AutoComplete_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
@@ -378,7 +382,10 @@ namespace YUMAPI.Views
             if (string.IsNullOrEmpty(motCle)) return;
             PanneauAutoComplete.Visibility = Visibility.Collapsed;
             await ChargerRecettes(motCle);
-            TxtSectionTitle.Text = $"RÉSULTATS POUR \"{motCle.ToUpper()}\"";
+            // Texte traduit selon la langue active
+            string l1 = TraductionService.LangueActuelle;
+            string labelResultat1 = l1 == "es" ? "RESULTADOS PARA" : l1 == "fr" ? "RÉSULTATS POUR" : "RESULTS FOR";
+            TxtSectionTitle.Text = $"{labelResultat1} \"{motCle.ToUpper()}\"";
         }
 
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)

@@ -174,7 +174,8 @@ namespace YUMAPI.Views
                 BoutonMicro.ToolTip = "Cliquer pour arrêter";
                 _microPulse.Begin();
 
-                TxtStatut.Text = "● Écoute en cours...";
+                string l = TraductionService.LangueActuelle;
+                TxtStatut.Text = "● " + (l == "es" ? "Escuchando..." : l == "fr" ? "Écoute en cours..." : "Listening...");
                 TxtStatut.Foreground = new SolidColorBrush(
                     (Color)ColorConverter.ConvertFromString("#CC0000"));
 
