@@ -1,7 +1,5 @@
 ﻿// ============================================================
 //  Views/ListeView.xaml.cs
-//  + Autocomplétion (base complète en arrière-plan)
-//  + Recherche IA étendue (filtre local)
 // ============================================================
 
 using System.Collections.Generic;
@@ -26,10 +24,9 @@ namespace YUMAPI.Views
         private bool _baseChargee = false;
         private bool _ignorerTextChanged = false;
 
-        // Dictionnaire de traduction FR/ES → EN pour la recherche
+        // Dictionnaire de traduction FR/ES → EN
         private static readonly Dictionary<string, string> _traductions = new Dictionary<string, string>
         {
-            // Pays / origines
             {"marocain","Moroccan"}, {"maroc","Moroccan"}, {"moroccan","Moroccan"},
             {"algerien","Algerian"}, {"algérien","Algerian"}, {"algerie","Algerian"}, {"algérie","Algerian"},
             {"tunisien","Tunisian"}, {"tunisie","Tunisian"},
@@ -46,7 +43,6 @@ namespace YUMAPI.Views
             {"thai","Thai"}, {"thaï","Thai"}, {"thailande","Thai"}, {"thaïlande","Thai"},
             {"britannique","British"}, {"anglais","British"},
             {"canadien","Canadian"}, {"canada","Canadian"},
-            // Ingrédients
             {"poulet","chicken"}, {"boeuf","beef"}, {"bœuf","beef"},
             {"agneau","lamb"}, {"porc","pork"}, {"poisson","fish"},
             {"crevettes","shrimp"}, {"fruits de mer","seafood"},
@@ -63,6 +59,7 @@ namespace YUMAPI.Views
         public delegate void DeconnexionHandler();
         public event DeconnexionHandler Deconnexion;
 
+        // Nouvel événement : clic sur l'avatar → ouvrir le profil
         public delegate void OuvrirProfilHandler();
         public event OuvrirProfilHandler OuvrirProfil;
 
@@ -70,13 +67,12 @@ namespace YUMAPI.Views
         {
             InitializeComponent();
 
-            // Mettre à jour les cœurs au chargement de la liste
+            // Mettre à jour les cœurs quand l'utilisateur fait défiler la liste
             ListeRecettes.Loaded += (s2, e2) =>
             {
-                // Accéder au ScrollViewer interne de la ListView
-                var sv = FindScrollViewer(ListeRecettes);
+                ScrollViewer sv = TrouverScrollViewer(ListeRecettes);
                 if (sv != null)
-                    sv.ScrollChanged += (s3, e3) => MettreAJourCoeursInternal();
+                    sv.ScrollChanged += (s3, e3) => MettreAJourCoeurs();
             };
 
             Loaded += async (s, e) =>
@@ -88,12 +84,38 @@ namespace YUMAPI.Views
                     TxtAvatar.Text = u.Length > 0 ? u[0].ToString().ToUpper() : "?";
                 }
 
-                // Synchroniser toute l'interface avec la langue choisie au login
                 AppliquerLangue();
+
+                // S'abonner au changement de couleur pour mettre à jour cette vue
+                ThemeManager.CouleurChangee += AppliquerCouleurTheme;
+                AppliquerCouleurTheme();
 
                 await ChargerRecettes("chicken");
                 _ = ChargerBaseCompleteAsync();
             };
+
+            // Se désabonner quand la vue est déchargée (évite les fuites mémoire)
+            Unloaded += (s, e) =>
+            {
+                ThemeManager.CouleurChangee -= AppliquerCouleurTheme;
+            };
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  MISE À JOUR DE LA COULEUR THÈME
+        // ════════════════════════════════════════════════════════════
+        private void AppliquerCouleurTheme()
+        {
+            SolidColorBrush brosse = ThemeManager.CouleurAccent;
+
+            // Bouton favoris en haut à droite
+            BordureFavorisHaut.Background = brosse;
+
+            // Bouton de recherche
+            BtnRechercher.Background = brosse;
+
+            // Réappliquer la logique de langue / état visuel
+            AppliquerLangue();
         }
 
         // ════════════════════════════════════════════════════════════
@@ -104,7 +126,7 @@ namespace YUMAPI.Views
             string cle = motCle.Trim().ToLower();
             if (_traductions.ContainsKey(cle))
                 return _traductions[cle];
-            return motCle; // Pas de traduction trouvée → garder tel quel
+            return motCle;
         }
 
         // ════════════════════════════════════════════════════════════
@@ -114,29 +136,25 @@ namespace YUMAPI.Views
         {
             string l = TraductionService.LangueActuelle;
 
-            // Membre
             TxtMembre.Text = l == "en" ? "Member" : l == "es" ? "Miembro" : "Membre";
 
-            // Titre section
             TxtSectionTitle.Text = l == "en" ? "FEATURED COLLECTION"
                                  : l == "es" ? "COLECCIÓN DESTACADA"
                                  : "COLLECTION VEDETTE";
 
-            // Boutons langue — actif = orange, inactif = transparent
-            SolidColorBrush orange = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35"));
+            SolidColorBrush accent = ThemeManager.CouleurAccent;
             SolidColorBrush transparent = new SolidColorBrush(Colors.Transparent);
             SolidColorBrush blanc = new SolidColorBrush(Colors.White);
             SolidColorBrush gris = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#888888"));
 
-            BtnLangEN.Background = l == "en" ? orange : transparent;
-            BtnLangFR.Background = l == "fr" ? orange : transparent;
-            BtnLangES.Background = l == "es" ? orange : transparent;
+            BtnLangEN.Background = l == "en" ? accent : transparent;
+            BtnLangFR.Background = l == "fr" ? accent : transparent;
+            BtnLangES.Background = l == "es" ? accent : transparent;
 
             TxtLangEN.Foreground = l == "en" ? blanc : gris;
             TxtLangFR.Foreground = l == "fr" ? blanc : gris;
             TxtLangES.Foreground = l == "es" ? blanc : gris;
 
-            // Bouton toutes les recettes
             TxtToutesRecettes.Text = l == "en" ? "All recipes"
                                    : l == "es" ? "Todas las recetas"
                                    : "Toutes les recettes";
@@ -166,10 +184,6 @@ namespace YUMAPI.Views
             _baseChargee = true;
         }
 
-        // ════════════════════════════════════════════════════════════
-        //  RECHERCHE API
-        // ════════════════════════════════════════════════════════════
-        // Pays reconnus par TheMealDB
         private static readonly HashSet<string> _paysConnus = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "American","British","Canadian","Chinese","Croatian","Dutch","Egyptian",
@@ -178,32 +192,41 @@ namespace YUMAPI.Views
             "Spanish","Thai","Tunisian","Turkish","Ukrainian","Algerian","Lebanese","Vietnamese"
         };
 
+        // ════════════════════════════════════════════════════════════
+        //  RECHERCHE API
+        // ════════════════════════════════════════════════════════════
         private async Task ChargerRecettes(string motCle)
         {
-            // Traduire le mot clé si en français
             string motCleEN = TraduireMotCle(motCle);
 
-            // Si c'est un pays → appel API direct (filter.php?a=)
             if (_paysConnus.Contains(motCleEN))
             {
                 await _controller.RechercherAsync(motCleEN);
                 _recettesActuelles = _controller.ListeRecettes ?? new List<MealListItem>();
             }
-            // Si base chargée → filtrer localement par StartsWith
             else if (_baseChargee && _toutesLesRecettes.Any())
             {
+                // D'abord StartsWith (résultats les plus pertinents en tête)
                 _recettesActuelles = _toutesLesRecettes
                     .Where(r => r.Title.ToLower().StartsWith(motCleEN.ToLower())
                              || r.Title.ToLower().StartsWith(motCle.ToLower()))
                     .ToList();
 
-                // Si aucun résultat → essayer Contains
+                // Ensuite Contains si rien trouvé
                 if (!_recettesActuelles.Any())
                 {
                     _recettesActuelles = _toutesLesRecettes
                         .Where(r => r.Title.ToLower().Contains(motCleEN.ToLower())
                                  || r.Title.ToLower().Contains(motCle.ToLower()))
                         .ToList();
+                }
+
+                // Fallback API si toujours rien
+                // (la base se charge lettre par lettre, un mot peut ne pas encore être indexé)
+                if (!_recettesActuelles.Any())
+                {
+                    await _controller.RechercherAsync(motCleEN);
+                    _recettesActuelles = _controller.ListeRecettes ?? new List<MealListItem>();
                 }
             }
             else
@@ -235,7 +258,6 @@ namespace YUMAPI.Views
                 return;
             }
 
-            // Suggestions instantanées — le panneau reste ouvert jusqu'au clic ou Entrée
             if (_baseChargee && motCle.Length >= 1)
             {
                 var suggestions = _toutesLesRecettes
@@ -254,7 +276,6 @@ namespace YUMAPI.Views
                 }
             }
 
-            // Debounce — ON NE FERME PLUS LE PANNEAU ICI
             await Task.Delay(500);
             if (motCle != SearchBox.Text) return;
 
@@ -262,17 +283,14 @@ namespace YUMAPI.Views
             await ChargerRecettes(motCle);
             int n = _recettesActuelles?.Count ?? 0;
             TxtSectionTitle.Text = n > 0 ? $"RÉSULTATS : {n}" : "AUCUN RÉSULTAT";
-            // Le panneau reste visible tant que l'utilisateur n'a pas cliqué ou appuyé Entrée
         }
 
-        // ── Affiche les suggestions avec la partie tapée en orange ─────────
         private void AfficherSuggestions(List<MealListItem> suggestions, string motCle)
         {
             ListeAutoComplete.Items.Clear();
 
             foreach (MealListItem recette in suggestions)
             {
-                // Créer un StackPanel avec icône + TextBlock coloré
                 StackPanel sp = new StackPanel { Orientation = Orientation.Horizontal };
 
                 TextBlock icone = new TextBlock
@@ -284,20 +302,17 @@ namespace YUMAPI.Views
                 };
                 sp.Children.Add(icone);
 
-                // TextBlock avec la partie tapée en orange et le reste en blanc
                 TextBlock txt = new TextBlock { FontSize = 13, VerticalAlignment = VerticalAlignment.Center };
 
                 string titre = recette.Title;
                 int longueur = motCle.Length;
 
-                // Partie tapée → orange + gras
                 txt.Inlines.Add(new System.Windows.Documents.Run(titre.Substring(0, longueur))
                 {
-                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6B35")),
+                    Foreground = ThemeManager.CouleurAccent,
                     FontWeight = FontWeights.Bold
                 });
 
-                // Reste du titre → blanc normal
                 if (longueur < titre.Length)
                 {
                     txt.Inlines.Add(new System.Windows.Documents.Run(titre.Substring(longueur))
@@ -308,7 +323,6 @@ namespace YUMAPI.Views
 
                 sp.Children.Add(txt);
 
-                // Wrapper ListViewItem avec le MealListItem en Tag
                 ListViewItem lvi = new ListViewItem
                 {
                     Content = sp,
@@ -322,10 +336,8 @@ namespace YUMAPI.Views
             }
         }
 
-        // ── Clic sur une suggestion (PreviewMouseDown pour éviter la perte de focus) ──
         private void ListeAutoComplete_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            // Trouver quel item a été cliqué via le Tag du ListViewItem
             var element = e.OriginalSource as FrameworkElement;
             MealListItem item = null;
 
@@ -341,7 +353,7 @@ namespace YUMAPI.Views
 
             if (item == null) return;
 
-            e.Handled = true; // Empêche la perte de focus du SearchBox
+            e.Handled = true;
 
             _ignorerTextChanged = true;
             PanneauAutoComplete.Visibility = Visibility.Collapsed;
@@ -358,10 +370,8 @@ namespace YUMAPI.Views
             TxtSectionTitle.Text = $"RÉSULTATS POUR \"{titre.ToUpper()}\"";
         }
 
-        // Garder SelectionChanged vide pour éviter les conflits
         private void AutoComplete_SelectionChanged(object sender, SelectionChangedEventArgs e) { }
 
-        // ── Bouton → ─────────────────────────────────────────────────────
         private async void BtnRechercher_Click(object sender, RoutedEventArgs e)
         {
             string motCle = SearchBox.Text;
@@ -371,7 +381,6 @@ namespace YUMAPI.Views
             TxtSectionTitle.Text = $"RÉSULTATS POUR \"{motCle.ToUpper()}\"";
         }
 
-        // ── Touche Entrée / Escape ────────────────────────────────────────
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -410,8 +419,7 @@ namespace YUMAPI.Views
                 ListeRecettes.ItemsSource = null;
                 ListeRecettes.ItemsSource = _recettesActuelles;
                 BtnFavorisHaut.Text = "🤍";
-                BordureFavorisHaut.Background = new SolidColorBrush(
-                    (Color)ColorConverter.ConvertFromString("#FF6B35"));
+                BordureFavorisHaut.Background = ThemeManager.CouleurAccent;
             }
             else { AfficherFavoris(); }
         }
@@ -423,67 +431,15 @@ namespace YUMAPI.Views
             TxtSectionTitle.Text = favoris.Count > 0
                 ? $"❤️ MES FAVORIS ({favoris.Count})"
                 : "❤️ AUCUN FAVORI";
-
-            // Désactiver la virtualisation pour les favoris
-            ListeRecettes.SetValue(VirtualizingPanel.IsVirtualizingProperty, false);
             ListeRecettes.ItemsSource = null;
             ListeRecettes.ItemsSource = favoris;
             BtnFavorisHaut.Text = "❤️";
             BordureFavorisHaut.Background = new SolidColorBrush(
                 (Color)ColorConverter.ConvertFromString("#CC0000"));
-
-            Dispatcher.InvokeAsync(async () => { await System.Threading.Tasks.Task.Delay(200); MettreAJourCoeursInternal(); });
-        }
-
-        // ── Met à jour tous les boutons ❤ selon les favoris ──────────────
-        private System.Windows.Controls.ScrollViewer FindScrollViewer(System.Windows.DependencyObject d)
-        {
-            if (d is System.Windows.Controls.ScrollViewer sv) return sv;
-            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(d); i++)
-            {
-                var result = FindScrollViewer(System.Windows.Media.VisualTreeHelper.GetChild(d, i));
-                if (result != null) return result;
-            }
-            return null;
-        }
-
-        private void MettreAJourCoeurs()
-        {
-            MettreAJourCoeursInternal();
-        }
-
-        private void MettreAJourCoeursInternal()
-        {
-            ListeRecettes.UpdateLayout();
-            foreach (var item in ListeRecettes.Items)
-            {
-                MealListItem recette = item as MealListItem;
-                if (recette == null) continue;
-                ListViewItem lvi = ListeRecettes.ItemContainerGenerator
-                    .ContainerFromItem(item) as ListViewItem;
-                if (lvi == null) continue;
-                Border bouton = TrouverBoutonCoeur(lvi);
-                if (bouton == null) continue;
-                TextBlock coeur = bouton.Child as TextBlock;
-                if (coeur != null)
-                    coeur.Text = FavorisManager.EstFavori(recette.Id) ? "❤️" : "🤍";
-            }
-        }
-
-        private Border TrouverBoutonCoeur(System.Windows.DependencyObject parent)
-        {
-            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-                if (child is Border b && b.Tag is MealListItem) return b;
-                var result = TrouverBoutonCoeur(child);
-                if (result != null) return result;
-            }
-            return null;
         }
 
         // ════════════════════════════════════════════════════════════
-        //  TOUTES LES RECETTES (instantané si base déjà chargée)
+        //  TOUTES LES RECETTES
         // ════════════════════════════════════════════════════════════
         private async void BtnToutesLesRecettes_Click(object sender, MouseButtonEventArgs e)
         {
@@ -530,7 +486,7 @@ namespace YUMAPI.Views
         }
 
         // ════════════════════════════════════════════════════════════
-        //  SÉLECTION + DÉCONNEXION
+        //  SÉLECTION + DÉCONNEXION + PROFIL
         // ════════════════════════════════════════════════════════════
         private void ListeRecettes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -545,6 +501,7 @@ namespace YUMAPI.Views
             if (Deconnexion != null) Deconnexion();
         }
 
+        // Clic sur l'avatar → ouvrir le profil
         private void BtnAvatar_Click(object sender, MouseButtonEventArgs e)
         {
             if (OuvrirProfil != null)
@@ -552,8 +509,55 @@ namespace YUMAPI.Views
         }
 
         // ════════════════════════════════════════════════════════════
-        //  CHAT IA → filtre local pour + de résultats
+        //  CHAT IA
         // ════════════════════════════════════════════════════════════
+        // ── Parcourt le VisualTree pour trouver le ScrollViewer interne ──────
+        private ScrollViewer TrouverScrollViewer(DependencyObject parent)
+        {
+            if (parent is ScrollViewer sv) return sv;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                ScrollViewer result = TrouverScrollViewer(VisualTreeHelper.GetChild(parent, i));
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        // ── Met à jour les icônes ❤ des recettes visibles à l'écran ─────────
+        private void MettreAJourCoeurs()
+        {
+            ListeRecettes.UpdateLayout();
+            foreach (object item in ListeRecettes.Items)
+            {
+                MealListItem recette = item as MealListItem;
+                if (recette == null) continue;
+
+                ListViewItem lvi = ListeRecettes.ItemContainerGenerator
+                    .ContainerFromItem(item) as ListViewItem;
+                if (lvi == null) continue;
+
+                Border bouton = TrouverBoutonCoeur(lvi);
+                if (bouton == null) continue;
+
+                TextBlock coeur = bouton.Child as TextBlock;
+                if (coeur != null)
+                    coeur.Text = FavorisManager.EstFavori(recette.Id) ? "❤️" : "🤍";
+            }
+        }
+
+        // ── Parcourt le VisualTree pour trouver le bouton cœur d'un item ─────
+        private Border TrouverBoutonCoeur(DependencyObject parent)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                if (child is Border b && b.Tag is MealListItem) return b;
+                Border result = TrouverBoutonCoeur(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
         public async void LancerRecherche(string motCle)
         {
             SearchBox.Text = motCle;

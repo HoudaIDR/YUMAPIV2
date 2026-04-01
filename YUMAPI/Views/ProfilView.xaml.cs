@@ -93,17 +93,18 @@ namespace YUMAPI.Views
             // Enlever l'ombre sur tous les cercles
             SupprimerEffetsTousLesCercles();
 
-            // Ajouter l'ombre sur le cercle actif et mettre à jour le texte
-            string hex = ThemeManager.CouleurHex;
+            // Comparer en ignorant les espaces parasites (Trim() sécurise la comparaison)
+            string hex = ThemeManager.CouleurHex.Trim();
             string nom = "Orange (par défaut)";
 
             if (hex == "#FF6B35") { AjouterEffet(CerclOrange, hex); nom = "Orange (par défaut)"; }
             else if (hex == "#F48FB1") { AjouterEffet(CerclRose, hex); nom = "Rose"; }
-            else if (hex == "#C62828 ") { AjouterEffet(CerclRouge, hex); nom = "Rouge"; }
+            else if (hex == "#C62828") { AjouterEffet(CerclRouge, hex); nom = "Rouge"; }
             else if (hex == "#90CAF9") { AjouterEffet(CerclBleu, hex); nom = "Bleu"; }
-            else if (hex == "#A5D6A7 ") { AjouterEffet(CerclVert, hex); nom = "Vert"; }
-            else if (hex == "#6A1B9A ") { AjouterEffet(CerclViolet, hex); nom = "Violet"; }
+            else if (hex == "#A5D6A7") { AjouterEffet(CerclVert, hex); nom = "Vert"; }
+            else if (hex == "#6A1B9A") { AjouterEffet(CerclViolet, hex); nom = "Violet"; }
 
+            // Mettre à jour le texte et sa couleur pour refléter le thème actif
             TxtCouleurActive.Text = "Couleur active : " + nom;
             TxtCouleurActive.Foreground = brosse;
         }

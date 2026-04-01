@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using YUMAPI.Models;
 
 namespace YUMAPI.Models
@@ -52,6 +51,16 @@ namespace YUMAPI.Models
             });
 
             File.WriteAllText(_fichier, json);
+        }
+
+        // ── Enregistrer la dernière recette consultée ────────────────────
+        public static void EnregistrerDerniereRecette(MealListItem recette)
+        {
+            if (UtilisateurConnecte == null || recette == null)
+                return;
+
+            UtilisateurConnecte.DerniereRecette = recette;
+            Sauvegarder();
         }
 
         // ── Hasher en MD5 ─────────────────────────────────────────────────

@@ -1,8 +1,10 @@
 ﻿// ============================================================
 //  Controllers/ThemeManager.cs
-//  Gestion de la couleur accent - mise à jour globale via App.Resources
+//  Gère la couleur accent de l'application
+//  Quand on change la couleur, toutes les vues sont notifiées
 // ============================================================
 
+using System;
 using System.Windows;
 using System.Windows.Media;
 
@@ -11,6 +13,8 @@ namespace YUMAPI.Controllers
     public static class ThemeManager
     {
         public static string CouleurHex = "#FF6B35";
+
+        public static event Action CouleurChangee;
 
         public static SolidColorBrush CouleurAccent
         {
@@ -23,14 +27,16 @@ namespace YUMAPI.Controllers
 
         public static void ChangerCouleur(string hex)
         {
-            CouleurHex = hex;
+            CouleurHex = (hex ?? "#FF6B35").Trim();
 
-            // Mettre à jour la ressource globale → tous les éléments se rafraîchissent
             if (Application.Current != null)
             {
-                Color couleur = (Color)ColorConverter.ConvertFromString(hex);
+                Color couleur = (Color)ColorConverter.ConvertFromString(CouleurHex);
                 Application.Current.Resources["AccentColor"] = new SolidColorBrush(couleur);
             }
+
+            if (CouleurChangee != null)
+                CouleurChangee();
         }
     }
 }

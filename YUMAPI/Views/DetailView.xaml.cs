@@ -42,6 +42,15 @@ namespace YUMAPI.Views
                 TxtAccueilSous.Text = l == "en" ? "or search for a dish in the list"
                                      : l == "es" ? "o busca un plato en la lista"
                                      : "ou recherchez un plat dans la liste";
+
+                // S'abonner au changement de couleur
+                ThemeManager.CouleurChangee += AppliquerCouleur;
+            };
+
+            // Se désabonner quand la vue est déchargée
+            Unloaded += (s, e) =>
+            {
+                ThemeManager.CouleurChangee -= AppliquerCouleur;
             };
         }
 
@@ -74,6 +83,9 @@ namespace YUMAPI.Views
 
             _recetteOriginale = recette;
             _recetteActuelle = new MealListItem { Id = recette.idMeal, Title = recette.strMeal, Thumb = recette.strMealThumb };
+
+            // Enregistrer la derniere recette consultee dans le profil
+            UserController.EnregistrerDerniereRecette(_recetteActuelle);
 
             if (traductionActive)
                 recette = await TraductionService.TraduireRecette(recette);
@@ -151,27 +163,23 @@ namespace YUMAPI.Views
             }
         }
 
-        // ── Longueur max du texte affiché dans le badge orange ───────────
+        // Longueur max du texte dans le badge orange avant découpage
         private const int LONGUEUR_MAX_BADGE = 18;
 
         private void AjouterCarteIngredient(string mesure, string ingredient)
         {
             if (string.IsNullOrWhiteSpace(ingredient)) return;
 
-            // --- Préparer le texte de la mesure ---
+            // Si la mesure est trop longue, on coupe proprement sur un espace
+            // et on met le surplus en petit texte gris sous l'ingrédient
             string mesureBrute = string.IsNullOrWhiteSpace(mesure) ? "—" : mesure.Trim();
-
-            // Si la mesure est trop longue pour le badge, on la coupe
-            // et on affiche le reste sous l'ingrédient en complément
             string texteBadge;
             string mesureSurplus = "";
 
             if (mesureBrute.Length > LONGUEUR_MAX_BADGE)
             {
-                // On cherche à couper proprement sur un espace si possible
                 int coupure = mesureBrute.LastIndexOf(' ', LONGUEUR_MAX_BADGE);
-                if (coupure < 5) coupure = LONGUEUR_MAX_BADGE; // Pas d'espace trouvé → couper brutalement
-
+                if (coupure < 5) coupure = LONGUEUR_MAX_BADGE;
                 texteBadge = mesureBrute.Substring(0, coupure).Trim();
                 mesureSurplus = mesureBrute.Substring(coupure).Trim();
             }
@@ -180,7 +188,6 @@ namespace YUMAPI.Views
                 texteBadge = mesureBrute;
             }
 
-            // --- Carte extérieure ---
             Border carte = new Border
             {
                 Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1E1E1E")),
@@ -191,18 +198,17 @@ namespace YUMAPI.Views
                 BorderThickness = new Thickness(1)
             };
 
-            // --- Grille : colonne badge | colonne texte ingrédient ---
             Grid g = new Grid();
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // Badge orange avec la mesure tronquée
+            // Badge orange — taille limitée pour éviter le débordement
             Border badge = new Border
             {
                 Background = ThemeManager.CouleurAccent,
                 CornerRadius = new CornerRadius(8),
                 Padding = new Thickness(10, 8, 10, 8),
-                MaxWidth = 130,              // Largeur max du badge
+                MaxWidth = 130,
                 MinWidth = 50,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Center
@@ -217,20 +223,19 @@ namespace YUMAPI.Views
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 TextAlignment = TextAlignment.Center,
-                TextWrapping = TextWrapping.Wrap,   // Wrap dans le badge si besoin
+                TextWrapping = TextWrapping.Wrap
             };
 
             Grid.SetColumn(badge, 0);
             g.Children.Add(badge);
 
-            // Colonne droite : ingrédient + éventuel surplus de mesure
+            // Colonne droite : nom de l'ingrédient + surplus de mesure si besoin
             StackPanel colonneTexte = new StackPanel
             {
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(12, 0, 0, 0)
             };
 
-            // Nom de l'ingrédient
             colonneTexte.Children.Add(new TextBlock
             {
                 Text = ingredient.Trim(),
@@ -239,7 +244,6 @@ namespace YUMAPI.Views
                 TextWrapping = TextWrapping.Wrap
             });
 
-            // Si la mesure était trop longue, afficher la suite en petit gris clair
             if (!string.IsNullOrEmpty(mesureSurplus))
             {
                 colonneTexte.Children.Add(new TextBlock
@@ -397,6 +401,26 @@ namespace YUMAPI.Views
             SolidColorBrush b = ThemeManager.CouleurAccent;
             TagCategorieBorder.Background = b;
             BoutonFavoriDetail.Background = b;
+
+            // Mettre a jour le texte de chargement
+            try { LoadingText.Foreground = b; } catch { }
+
+            // Mettre a jour la barre de progression
+            try { BarreProgression.Background = b; } catch { }
+
+            // Mettre a jour le badge calories
+            try { BadgeCalories.BorderBrush = b; } catch { }
+
+            // Mettre a jour la barre d etapes mode guide
+            try { BarreEtapes.Background = b; } catch { }
+            try { TxtNumeroEtape.Foreground = b; } catch { }
+            try { BtnSuivant.Background = b; } catch { }
+
+            // Mettre a jour le bouton demarrer
+            try { BoutonDemarrer.Background = b; } catch { }
+
+            // Mettre a jour le bouton +
+            try { BtnPlus.Background = b; } catch { }
         }
 
         private void BtnFavoriDetail_Click(object sender, MouseButtonEventArgs e)
