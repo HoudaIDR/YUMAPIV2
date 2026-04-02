@@ -88,36 +88,22 @@ namespace YUMAPI.Views
 
             // Initialiser le micro
             InitialiserMicro();
-
-            Loaded += (s, e) =>
-            {
-                // Traduire le statut "En ligne" au chargement
-                string l = TraductionService.LangueActuelle;
-                TxtStatut.Text = "● " + (l == "es" ? "En línea" : l == "fr" ? "En ligne" : "Online");
-
-                string bienvenue = l == "es"
-                    ? "¡Hola! 👋 Soy tu asistente culinario Yum!\n\n" +
-                      "Puedo ayudarte a:\n" +
-                      "• Encontrar recetas con tus ingredientes\n" +
-                      "• Sugerir un plato según tus deseos\n\n" +
-                      "¡Dime qué quieres comer! 🍽️\n" +
-                      "También puedes hacer clic en 🎤 para hablar!"
-                    : l == "fr"
-                    ? "Bonjour ! 👋 Je suis votre assistant culinaire Yum!\n\n" +
-                      "Je peux vous aider à :\n" +
-                      "• Trouver une recette avec vos ingrédients\n" +
-                      "• Suggérer un plat selon vos envies\n\n" +
-                      "Dites-moi ce que vous voulez manger ! 🍽️\n" +
-                      "Vous pouvez aussi cliquer sur 🎤 pour parler !"
-                    : "Hello! 👋 I'm your Yum! culinary assistant\n\n" +
-                      "I can help you:\n" +
-                      "• Find recipes with your ingredients\n" +
-                      "• Suggest a dish based on your cravings\n\n" +
-                      "Tell me what you want to eat! 🍽️\n" +
-                      "You can also click 🎤 to speak!";
-                AjouterMessageIA(bienvenue);
-            };
         }
+            public void Initialiser()
+        {
+            string l = TraductionService.LangueActuelle;
+
+            TxtStatut.Text = "● " + (l == "es" ? "En línea" : l == "fr" ? "En ligne" : "Online");
+
+            string bienvenue = l == "es"
+                ? "¡Hola! 👋 Soy tu asistente culinario Yum!\n\nPuedo ayudarte a:\n• Encontrar recetas con tus ingredientes\n• Sugerir un plato según tus deseos\n\n¡Dime qué quieres comer! 🍽️\nTambién puedes hacer clic en 🎤 para hablar!"
+                : l == "fr"
+                ? "Bonjour ! 👋 Je suis votre assistant culinaire Yum!\n\nJe peux vous aider à :\n• Trouver une recette avec vos ingrédients\n• Suggérer un plat selon vos envies\n\nDites-moi ce que vous voulez manger ! 🍽️\nVous pouvez aussi cliquer sur 🎤 pour parler !"
+                : "Hello! 👋 I'm your Yum! culinary assistant\n\nI can help you:\n• Find recipes with your ingredients\n• Suggest a dish based on your cravings\n\nTell me what you want to eat! 🍽️\nYou can also click 🎤 to speak!";
+
+            AjouterMessageIA(bienvenue);
+        }
+        
 
         // ════════════════════════════════════════════════════════════
         //  RECONNAISSANCE VOCALE
@@ -530,7 +516,15 @@ namespace YUMAPI.Views
             ScrollToBottom();
             return bulle;
         }
-
+        public void ReinitialiserEtOuvrir()
+        {
+            // Vider les messages affichés
+            PanneauMessages.Children.Clear();
+            // Vider l'historique IA
+            _historique.Clear();
+            // Afficher le message de bienvenue dans la bonne langue
+            Initialiser();
+        }
         private void ScrollToBottom()
         {
             Dispatcher.InvokeAsync(() => ScrollMessages.ScrollToEnd(),

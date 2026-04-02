@@ -166,8 +166,10 @@ namespace YUMAPI
         // ── Ouvrir le panneau chat ────────────────────────────────────────
         private void OuvrirChat()
         {
-            PanneauChat.Visibility = Visibility.Visible;
+            // Réinitialiser le chat avec la langue actuelle
+            chatView.ReinitialiserEtOuvrir();
 
+            PanneauChat.Visibility = Visibility.Visible;
             BoutonChat.Child = new TextBlock
             {
                 Text = "✕",
